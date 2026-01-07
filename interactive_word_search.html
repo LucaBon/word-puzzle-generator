@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Puzzle</title>
+    <title>Word Search Puzzle</title>
     <style>
         :root {
-            --cell-size: 28px;
-            --font-size: 14px;
+            --cell-size: 35px;
+            --font-size: 16px;
             --grid-gap: 2px;
-            --border-radius: 4px;
+            --border-radius: 5px;
             --word-item-padding: 12px 16px;
             --word-item-font-size: 1.1em;
             --word-gap: 10px;
@@ -17,11 +17,7 @@
             --words-list-columns: 1;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,7 +35,7 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 1208px;
+            max-width: 1200px;
             width: 100%;
         }
 
@@ -85,7 +81,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(25, var(--cell-size));
+            grid-template-columns: repeat(20, var(--cell-size));
             gap: var(--grid-gap);
         }
 
@@ -105,26 +101,11 @@
             transition: all 0.2s ease;
             position: relative;
         }
-        
-        .cell:hover {
-            background: #e3f2fd;
-            transform: scale(1.05);
-            z-index: 10;
-        }
-        
-        .cell.selecting {
-            background: #bbdefb !important;
-            border-color: #2196F3 !important;
-            transform: scale(1.1);
-            z-index: 100;
-        }
-        
-        .cell.found {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border-color: #4CAF50;
-        }
-        
+
+        .cell:hover { background: #e3f2fd; transform: scale(1.05); z-index: 10; }
+        .cell.selecting { background: #bbdefb !important; border-color: #2196F3 !important; transform: scale(1.1); z-index: 100; }
+        .cell.found { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border-color: #4CAF50; }
+
         .words-section {
             flex: 0 0 var(--words-section-width);
             min-width: 250px;
@@ -133,23 +114,10 @@
             overflow-x: hidden;
         }
 
-        .words-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .words-section::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .words-section::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        .words-section::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+        .words-section::-webkit-scrollbar { width: 8px; }
+        .words-section::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .words-section::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .words-section::-webkit-scrollbar-thumb:hover { background: #555; }
 
         .words-title {
             font-size: clamp(1.3em, 2vw, 1.8em);
@@ -157,7 +125,8 @@
             margin-bottom: 20px;
             font-weight: bold;
             text-align: center;
-            sticky: top 0;
+            position: sticky;
+            top: 0;
             background: white;
             padding: 10px 0;
             z-index: 10;
@@ -183,17 +152,10 @@
             text-align: center;
             word-break: break-word;
         }
-        
-        .word-item:hover {
-            transform: translateX(5px);
-        }
-        
-        .word-item.found {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
-        
+
+        .word-item:hover { transform: translateX(5px); }
+        .word-item.found { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); text-decoration: line-through; opacity: 0.7; }
+
         .stats {
             margin-top: 30px;
             padding: 20px;
@@ -201,23 +163,12 @@
             border-radius: 12px;
             text-align: center;
         }
-        
-        .stats h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .progress {
-            font-size: 1.5em;
-            color: #2196F3;
-            font-weight: bold;
-        }
-        
-        .controls {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
+
+        .stats h3 { color: #333; margin-bottom: 10px; }
+        .progress { font-size: 1.5em; color: #2196F3; font-weight: bold; }
+
+        .controls { margin-top: 20px; text-align: center; }
+
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -230,17 +181,10 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
         .victory {
             display: none;
             position: fixed;
@@ -255,94 +199,41 @@
             z-index: 1000;
             animation: popIn 0.5s ease;
         }
-        
-        .victory.show {
-            display: block;
-        }
-        
-        .victory h2 {
-            color: #4CAF50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-        
-        .victory p {
-            font-size: 1.2em;
-            color: #666;
-        }
-        
+
+        .victory.show { display: block; }
+        .victory h2 { color: #4CAF50; font-size: 2.5em; margin-bottom: 20px; }
+        .victory p { font-size: 1.2em; color: #666; }
+
         @keyframes popIn {
-            from {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
+            from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
 
-        .overlay.show {
-            display: block;
-        }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .overlay.show { display: block; }
 
-        /* Responsive adjustments for smaller screens */
         @media screen and (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            .game-container {
-                gap: 20px;
-            }
-
-            .grid-section {
-                min-width: 100%;
-            }
-
-            .grid-container {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-
-            .words-section {
-                flex: 0 0 100%;
-                width: 100%;
-            }
-
-            .words-list {
-                grid-template-columns: 1fr !important;
-            }
+            .container { padding: 20px; }
+            .game-container { gap: 20px; }
+            .grid-section { min-width: 100%; }
+            .grid-container { padding: 10px; }
+            h1 { font-size: 1.8em; }
+            .words-section { flex: 0 0 100%; width: 100%; }
+            .words-list { grid-template-columns: 1fr !important; }
         }
 
-        /* Extra scaling for very large grids */
         @media screen and (max-width: 1400px) {
             :root {
-                --cell-size: 28px;
-                --font-size: 14px;
+                --cell-size: 35px;
+                --font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 AI Puzzle</h1>
+        <h1>🔍 Word Search Puzzle</h1>
         <div class="subtitle">Click and drag to select words! Each game has a new puzzle.</div>
-        
         <div class="game-container">
             <div class="grid-section">
                 <div class="grid-container">
@@ -367,11 +258,6 @@
                         <div class="cell" data-row="0" data-col="17"></div>
                         <div class="cell" data-row="0" data-col="18"></div>
                         <div class="cell" data-row="0" data-col="19"></div>
-                        <div class="cell" data-row="0" data-col="20"></div>
-                        <div class="cell" data-row="0" data-col="21"></div>
-                        <div class="cell" data-row="0" data-col="22"></div>
-                        <div class="cell" data-row="0" data-col="23"></div>
-                        <div class="cell" data-row="0" data-col="24"></div>
                         <div class="cell" data-row="1" data-col="0"></div>
                         <div class="cell" data-row="1" data-col="1"></div>
                         <div class="cell" data-row="1" data-col="2"></div>
@@ -392,11 +278,6 @@
                         <div class="cell" data-row="1" data-col="17"></div>
                         <div class="cell" data-row="1" data-col="18"></div>
                         <div class="cell" data-row="1" data-col="19"></div>
-                        <div class="cell" data-row="1" data-col="20"></div>
-                        <div class="cell" data-row="1" data-col="21"></div>
-                        <div class="cell" data-row="1" data-col="22"></div>
-                        <div class="cell" data-row="1" data-col="23"></div>
-                        <div class="cell" data-row="1" data-col="24"></div>
                         <div class="cell" data-row="2" data-col="0"></div>
                         <div class="cell" data-row="2" data-col="1"></div>
                         <div class="cell" data-row="2" data-col="2"></div>
@@ -417,11 +298,6 @@
                         <div class="cell" data-row="2" data-col="17"></div>
                         <div class="cell" data-row="2" data-col="18"></div>
                         <div class="cell" data-row="2" data-col="19"></div>
-                        <div class="cell" data-row="2" data-col="20"></div>
-                        <div class="cell" data-row="2" data-col="21"></div>
-                        <div class="cell" data-row="2" data-col="22"></div>
-                        <div class="cell" data-row="2" data-col="23"></div>
-                        <div class="cell" data-row="2" data-col="24"></div>
                         <div class="cell" data-row="3" data-col="0"></div>
                         <div class="cell" data-row="3" data-col="1"></div>
                         <div class="cell" data-row="3" data-col="2"></div>
@@ -442,11 +318,6 @@
                         <div class="cell" data-row="3" data-col="17"></div>
                         <div class="cell" data-row="3" data-col="18"></div>
                         <div class="cell" data-row="3" data-col="19"></div>
-                        <div class="cell" data-row="3" data-col="20"></div>
-                        <div class="cell" data-row="3" data-col="21"></div>
-                        <div class="cell" data-row="3" data-col="22"></div>
-                        <div class="cell" data-row="3" data-col="23"></div>
-                        <div class="cell" data-row="3" data-col="24"></div>
                         <div class="cell" data-row="4" data-col="0"></div>
                         <div class="cell" data-row="4" data-col="1"></div>
                         <div class="cell" data-row="4" data-col="2"></div>
@@ -467,11 +338,6 @@
                         <div class="cell" data-row="4" data-col="17"></div>
                         <div class="cell" data-row="4" data-col="18"></div>
                         <div class="cell" data-row="4" data-col="19"></div>
-                        <div class="cell" data-row="4" data-col="20"></div>
-                        <div class="cell" data-row="4" data-col="21"></div>
-                        <div class="cell" data-row="4" data-col="22"></div>
-                        <div class="cell" data-row="4" data-col="23"></div>
-                        <div class="cell" data-row="4" data-col="24"></div>
                         <div class="cell" data-row="5" data-col="0"></div>
                         <div class="cell" data-row="5" data-col="1"></div>
                         <div class="cell" data-row="5" data-col="2"></div>
@@ -492,11 +358,6 @@
                         <div class="cell" data-row="5" data-col="17"></div>
                         <div class="cell" data-row="5" data-col="18"></div>
                         <div class="cell" data-row="5" data-col="19"></div>
-                        <div class="cell" data-row="5" data-col="20"></div>
-                        <div class="cell" data-row="5" data-col="21"></div>
-                        <div class="cell" data-row="5" data-col="22"></div>
-                        <div class="cell" data-row="5" data-col="23"></div>
-                        <div class="cell" data-row="5" data-col="24"></div>
                         <div class="cell" data-row="6" data-col="0"></div>
                         <div class="cell" data-row="6" data-col="1"></div>
                         <div class="cell" data-row="6" data-col="2"></div>
@@ -517,11 +378,6 @@
                         <div class="cell" data-row="6" data-col="17"></div>
                         <div class="cell" data-row="6" data-col="18"></div>
                         <div class="cell" data-row="6" data-col="19"></div>
-                        <div class="cell" data-row="6" data-col="20"></div>
-                        <div class="cell" data-row="6" data-col="21"></div>
-                        <div class="cell" data-row="6" data-col="22"></div>
-                        <div class="cell" data-row="6" data-col="23"></div>
-                        <div class="cell" data-row="6" data-col="24"></div>
                         <div class="cell" data-row="7" data-col="0"></div>
                         <div class="cell" data-row="7" data-col="1"></div>
                         <div class="cell" data-row="7" data-col="2"></div>
@@ -542,11 +398,6 @@
                         <div class="cell" data-row="7" data-col="17"></div>
                         <div class="cell" data-row="7" data-col="18"></div>
                         <div class="cell" data-row="7" data-col="19"></div>
-                        <div class="cell" data-row="7" data-col="20"></div>
-                        <div class="cell" data-row="7" data-col="21"></div>
-                        <div class="cell" data-row="7" data-col="22"></div>
-                        <div class="cell" data-row="7" data-col="23"></div>
-                        <div class="cell" data-row="7" data-col="24"></div>
                         <div class="cell" data-row="8" data-col="0"></div>
                         <div class="cell" data-row="8" data-col="1"></div>
                         <div class="cell" data-row="8" data-col="2"></div>
@@ -567,11 +418,6 @@
                         <div class="cell" data-row="8" data-col="17"></div>
                         <div class="cell" data-row="8" data-col="18"></div>
                         <div class="cell" data-row="8" data-col="19"></div>
-                        <div class="cell" data-row="8" data-col="20"></div>
-                        <div class="cell" data-row="8" data-col="21"></div>
-                        <div class="cell" data-row="8" data-col="22"></div>
-                        <div class="cell" data-row="8" data-col="23"></div>
-                        <div class="cell" data-row="8" data-col="24"></div>
                         <div class="cell" data-row="9" data-col="0"></div>
                         <div class="cell" data-row="9" data-col="1"></div>
                         <div class="cell" data-row="9" data-col="2"></div>
@@ -592,11 +438,6 @@
                         <div class="cell" data-row="9" data-col="17"></div>
                         <div class="cell" data-row="9" data-col="18"></div>
                         <div class="cell" data-row="9" data-col="19"></div>
-                        <div class="cell" data-row="9" data-col="20"></div>
-                        <div class="cell" data-row="9" data-col="21"></div>
-                        <div class="cell" data-row="9" data-col="22"></div>
-                        <div class="cell" data-row="9" data-col="23"></div>
-                        <div class="cell" data-row="9" data-col="24"></div>
                         <div class="cell" data-row="10" data-col="0"></div>
                         <div class="cell" data-row="10" data-col="1"></div>
                         <div class="cell" data-row="10" data-col="2"></div>
@@ -617,11 +458,6 @@
                         <div class="cell" data-row="10" data-col="17"></div>
                         <div class="cell" data-row="10" data-col="18"></div>
                         <div class="cell" data-row="10" data-col="19"></div>
-                        <div class="cell" data-row="10" data-col="20"></div>
-                        <div class="cell" data-row="10" data-col="21"></div>
-                        <div class="cell" data-row="10" data-col="22"></div>
-                        <div class="cell" data-row="10" data-col="23"></div>
-                        <div class="cell" data-row="10" data-col="24"></div>
                         <div class="cell" data-row="11" data-col="0"></div>
                         <div class="cell" data-row="11" data-col="1"></div>
                         <div class="cell" data-row="11" data-col="2"></div>
@@ -642,11 +478,6 @@
                         <div class="cell" data-row="11" data-col="17"></div>
                         <div class="cell" data-row="11" data-col="18"></div>
                         <div class="cell" data-row="11" data-col="19"></div>
-                        <div class="cell" data-row="11" data-col="20"></div>
-                        <div class="cell" data-row="11" data-col="21"></div>
-                        <div class="cell" data-row="11" data-col="22"></div>
-                        <div class="cell" data-row="11" data-col="23"></div>
-                        <div class="cell" data-row="11" data-col="24"></div>
                         <div class="cell" data-row="12" data-col="0"></div>
                         <div class="cell" data-row="12" data-col="1"></div>
                         <div class="cell" data-row="12" data-col="2"></div>
@@ -667,11 +498,6 @@
                         <div class="cell" data-row="12" data-col="17"></div>
                         <div class="cell" data-row="12" data-col="18"></div>
                         <div class="cell" data-row="12" data-col="19"></div>
-                        <div class="cell" data-row="12" data-col="20"></div>
-                        <div class="cell" data-row="12" data-col="21"></div>
-                        <div class="cell" data-row="12" data-col="22"></div>
-                        <div class="cell" data-row="12" data-col="23"></div>
-                        <div class="cell" data-row="12" data-col="24"></div>
                         <div class="cell" data-row="13" data-col="0"></div>
                         <div class="cell" data-row="13" data-col="1"></div>
                         <div class="cell" data-row="13" data-col="2"></div>
@@ -692,11 +518,6 @@
                         <div class="cell" data-row="13" data-col="17"></div>
                         <div class="cell" data-row="13" data-col="18"></div>
                         <div class="cell" data-row="13" data-col="19"></div>
-                        <div class="cell" data-row="13" data-col="20"></div>
-                        <div class="cell" data-row="13" data-col="21"></div>
-                        <div class="cell" data-row="13" data-col="22"></div>
-                        <div class="cell" data-row="13" data-col="23"></div>
-                        <div class="cell" data-row="13" data-col="24"></div>
                         <div class="cell" data-row="14" data-col="0"></div>
                         <div class="cell" data-row="14" data-col="1"></div>
                         <div class="cell" data-row="14" data-col="2"></div>
@@ -717,11 +538,6 @@
                         <div class="cell" data-row="14" data-col="17"></div>
                         <div class="cell" data-row="14" data-col="18"></div>
                         <div class="cell" data-row="14" data-col="19"></div>
-                        <div class="cell" data-row="14" data-col="20"></div>
-                        <div class="cell" data-row="14" data-col="21"></div>
-                        <div class="cell" data-row="14" data-col="22"></div>
-                        <div class="cell" data-row="14" data-col="23"></div>
-                        <div class="cell" data-row="14" data-col="24"></div>
                         <div class="cell" data-row="15" data-col="0"></div>
                         <div class="cell" data-row="15" data-col="1"></div>
                         <div class="cell" data-row="15" data-col="2"></div>
@@ -742,11 +558,6 @@
                         <div class="cell" data-row="15" data-col="17"></div>
                         <div class="cell" data-row="15" data-col="18"></div>
                         <div class="cell" data-row="15" data-col="19"></div>
-                        <div class="cell" data-row="15" data-col="20"></div>
-                        <div class="cell" data-row="15" data-col="21"></div>
-                        <div class="cell" data-row="15" data-col="22"></div>
-                        <div class="cell" data-row="15" data-col="23"></div>
-                        <div class="cell" data-row="15" data-col="24"></div>
                         <div class="cell" data-row="16" data-col="0"></div>
                         <div class="cell" data-row="16" data-col="1"></div>
                         <div class="cell" data-row="16" data-col="2"></div>
@@ -767,11 +578,6 @@
                         <div class="cell" data-row="16" data-col="17"></div>
                         <div class="cell" data-row="16" data-col="18"></div>
                         <div class="cell" data-row="16" data-col="19"></div>
-                        <div class="cell" data-row="16" data-col="20"></div>
-                        <div class="cell" data-row="16" data-col="21"></div>
-                        <div class="cell" data-row="16" data-col="22"></div>
-                        <div class="cell" data-row="16" data-col="23"></div>
-                        <div class="cell" data-row="16" data-col="24"></div>
                         <div class="cell" data-row="17" data-col="0"></div>
                         <div class="cell" data-row="17" data-col="1"></div>
                         <div class="cell" data-row="17" data-col="2"></div>
@@ -792,11 +598,6 @@
                         <div class="cell" data-row="17" data-col="17"></div>
                         <div class="cell" data-row="17" data-col="18"></div>
                         <div class="cell" data-row="17" data-col="19"></div>
-                        <div class="cell" data-row="17" data-col="20"></div>
-                        <div class="cell" data-row="17" data-col="21"></div>
-                        <div class="cell" data-row="17" data-col="22"></div>
-                        <div class="cell" data-row="17" data-col="23"></div>
-                        <div class="cell" data-row="17" data-col="24"></div>
                         <div class="cell" data-row="18" data-col="0"></div>
                         <div class="cell" data-row="18" data-col="1"></div>
                         <div class="cell" data-row="18" data-col="2"></div>
@@ -817,11 +618,6 @@
                         <div class="cell" data-row="18" data-col="17"></div>
                         <div class="cell" data-row="18" data-col="18"></div>
                         <div class="cell" data-row="18" data-col="19"></div>
-                        <div class="cell" data-row="18" data-col="20"></div>
-                        <div class="cell" data-row="18" data-col="21"></div>
-                        <div class="cell" data-row="18" data-col="22"></div>
-                        <div class="cell" data-row="18" data-col="23"></div>
-                        <div class="cell" data-row="18" data-col="24"></div>
                         <div class="cell" data-row="19" data-col="0"></div>
                         <div class="cell" data-row="19" data-col="1"></div>
                         <div class="cell" data-row="19" data-col="2"></div>
@@ -842,144 +638,12 @@
                         <div class="cell" data-row="19" data-col="17"></div>
                         <div class="cell" data-row="19" data-col="18"></div>
                         <div class="cell" data-row="19" data-col="19"></div>
-                        <div class="cell" data-row="19" data-col="20"></div>
-                        <div class="cell" data-row="19" data-col="21"></div>
-                        <div class="cell" data-row="19" data-col="22"></div>
-                        <div class="cell" data-row="19" data-col="23"></div>
-                        <div class="cell" data-row="19" data-col="24"></div>
-                        <div class="cell" data-row="20" data-col="0"></div>
-                        <div class="cell" data-row="20" data-col="1"></div>
-                        <div class="cell" data-row="20" data-col="2"></div>
-                        <div class="cell" data-row="20" data-col="3"></div>
-                        <div class="cell" data-row="20" data-col="4"></div>
-                        <div class="cell" data-row="20" data-col="5"></div>
-                        <div class="cell" data-row="20" data-col="6"></div>
-                        <div class="cell" data-row="20" data-col="7"></div>
-                        <div class="cell" data-row="20" data-col="8"></div>
-                        <div class="cell" data-row="20" data-col="9"></div>
-                        <div class="cell" data-row="20" data-col="10"></div>
-                        <div class="cell" data-row="20" data-col="11"></div>
-                        <div class="cell" data-row="20" data-col="12"></div>
-                        <div class="cell" data-row="20" data-col="13"></div>
-                        <div class="cell" data-row="20" data-col="14"></div>
-                        <div class="cell" data-row="20" data-col="15"></div>
-                        <div class="cell" data-row="20" data-col="16"></div>
-                        <div class="cell" data-row="20" data-col="17"></div>
-                        <div class="cell" data-row="20" data-col="18"></div>
-                        <div class="cell" data-row="20" data-col="19"></div>
-                        <div class="cell" data-row="20" data-col="20"></div>
-                        <div class="cell" data-row="20" data-col="21"></div>
-                        <div class="cell" data-row="20" data-col="22"></div>
-                        <div class="cell" data-row="20" data-col="23"></div>
-                        <div class="cell" data-row="20" data-col="24"></div>
-                        <div class="cell" data-row="21" data-col="0"></div>
-                        <div class="cell" data-row="21" data-col="1"></div>
-                        <div class="cell" data-row="21" data-col="2"></div>
-                        <div class="cell" data-row="21" data-col="3"></div>
-                        <div class="cell" data-row="21" data-col="4"></div>
-                        <div class="cell" data-row="21" data-col="5"></div>
-                        <div class="cell" data-row="21" data-col="6"></div>
-                        <div class="cell" data-row="21" data-col="7"></div>
-                        <div class="cell" data-row="21" data-col="8"></div>
-                        <div class="cell" data-row="21" data-col="9"></div>
-                        <div class="cell" data-row="21" data-col="10"></div>
-                        <div class="cell" data-row="21" data-col="11"></div>
-                        <div class="cell" data-row="21" data-col="12"></div>
-                        <div class="cell" data-row="21" data-col="13"></div>
-                        <div class="cell" data-row="21" data-col="14"></div>
-                        <div class="cell" data-row="21" data-col="15"></div>
-                        <div class="cell" data-row="21" data-col="16"></div>
-                        <div class="cell" data-row="21" data-col="17"></div>
-                        <div class="cell" data-row="21" data-col="18"></div>
-                        <div class="cell" data-row="21" data-col="19"></div>
-                        <div class="cell" data-row="21" data-col="20"></div>
-                        <div class="cell" data-row="21" data-col="21"></div>
-                        <div class="cell" data-row="21" data-col="22"></div>
-                        <div class="cell" data-row="21" data-col="23"></div>
-                        <div class="cell" data-row="21" data-col="24"></div>
-                        <div class="cell" data-row="22" data-col="0"></div>
-                        <div class="cell" data-row="22" data-col="1"></div>
-                        <div class="cell" data-row="22" data-col="2"></div>
-                        <div class="cell" data-row="22" data-col="3"></div>
-                        <div class="cell" data-row="22" data-col="4"></div>
-                        <div class="cell" data-row="22" data-col="5"></div>
-                        <div class="cell" data-row="22" data-col="6"></div>
-                        <div class="cell" data-row="22" data-col="7"></div>
-                        <div class="cell" data-row="22" data-col="8"></div>
-                        <div class="cell" data-row="22" data-col="9"></div>
-                        <div class="cell" data-row="22" data-col="10"></div>
-                        <div class="cell" data-row="22" data-col="11"></div>
-                        <div class="cell" data-row="22" data-col="12"></div>
-                        <div class="cell" data-row="22" data-col="13"></div>
-                        <div class="cell" data-row="22" data-col="14"></div>
-                        <div class="cell" data-row="22" data-col="15"></div>
-                        <div class="cell" data-row="22" data-col="16"></div>
-                        <div class="cell" data-row="22" data-col="17"></div>
-                        <div class="cell" data-row="22" data-col="18"></div>
-                        <div class="cell" data-row="22" data-col="19"></div>
-                        <div class="cell" data-row="22" data-col="20"></div>
-                        <div class="cell" data-row="22" data-col="21"></div>
-                        <div class="cell" data-row="22" data-col="22"></div>
-                        <div class="cell" data-row="22" data-col="23"></div>
-                        <div class="cell" data-row="22" data-col="24"></div>
-                        <div class="cell" data-row="23" data-col="0"></div>
-                        <div class="cell" data-row="23" data-col="1"></div>
-                        <div class="cell" data-row="23" data-col="2"></div>
-                        <div class="cell" data-row="23" data-col="3"></div>
-                        <div class="cell" data-row="23" data-col="4"></div>
-                        <div class="cell" data-row="23" data-col="5"></div>
-                        <div class="cell" data-row="23" data-col="6"></div>
-                        <div class="cell" data-row="23" data-col="7"></div>
-                        <div class="cell" data-row="23" data-col="8"></div>
-                        <div class="cell" data-row="23" data-col="9"></div>
-                        <div class="cell" data-row="23" data-col="10"></div>
-                        <div class="cell" data-row="23" data-col="11"></div>
-                        <div class="cell" data-row="23" data-col="12"></div>
-                        <div class="cell" data-row="23" data-col="13"></div>
-                        <div class="cell" data-row="23" data-col="14"></div>
-                        <div class="cell" data-row="23" data-col="15"></div>
-                        <div class="cell" data-row="23" data-col="16"></div>
-                        <div class="cell" data-row="23" data-col="17"></div>
-                        <div class="cell" data-row="23" data-col="18"></div>
-                        <div class="cell" data-row="23" data-col="19"></div>
-                        <div class="cell" data-row="23" data-col="20"></div>
-                        <div class="cell" data-row="23" data-col="21"></div>
-                        <div class="cell" data-row="23" data-col="22"></div>
-                        <div class="cell" data-row="23" data-col="23"></div>
-                        <div class="cell" data-row="23" data-col="24"></div>
-                        <div class="cell" data-row="24" data-col="0"></div>
-                        <div class="cell" data-row="24" data-col="1"></div>
-                        <div class="cell" data-row="24" data-col="2"></div>
-                        <div class="cell" data-row="24" data-col="3"></div>
-                        <div class="cell" data-row="24" data-col="4"></div>
-                        <div class="cell" data-row="24" data-col="5"></div>
-                        <div class="cell" data-row="24" data-col="6"></div>
-                        <div class="cell" data-row="24" data-col="7"></div>
-                        <div class="cell" data-row="24" data-col="8"></div>
-                        <div class="cell" data-row="24" data-col="9"></div>
-                        <div class="cell" data-row="24" data-col="10"></div>
-                        <div class="cell" data-row="24" data-col="11"></div>
-                        <div class="cell" data-row="24" data-col="12"></div>
-                        <div class="cell" data-row="24" data-col="13"></div>
-                        <div class="cell" data-row="24" data-col="14"></div>
-                        <div class="cell" data-row="24" data-col="15"></div>
-                        <div class="cell" data-row="24" data-col="16"></div>
-                        <div class="cell" data-row="24" data-col="17"></div>
-                        <div class="cell" data-row="24" data-col="18"></div>
-                        <div class="cell" data-row="24" data-col="19"></div>
-                        <div class="cell" data-row="24" data-col="20"></div>
-                        <div class="cell" data-row="24" data-col="21"></div>
-                        <div class="cell" data-row="24" data-col="22"></div>
-                        <div class="cell" data-row="24" data-col="23"></div>
-                        <div class="cell" data-row="24" data-col="24"></div>
                     </div>
                 </div>
-                
                 <div class="controls">
                     <button onclick="resetGame()">🎲 New Puzzle</button>
                 </div>
             </div>
-            
             <div class="words-section">
                 <div class="words-title">Words to Find:</div>
                 <div class="words-list" id="wordsList">
@@ -1004,7 +668,6 @@
                     <div class="word-item" data-word="TOKEN">TOKEN</div>
                     <div class="word-item" data-word="VISIONE">VISIONE</div>
                 </div>
-                
                 <div class="stats">
                     <h3>Progress</h3>
                     <div class="progress">
@@ -1014,7 +677,6 @@
             </div>
         </div>
     </div>
-    
     <div class="overlay" id="overlay"></div>
     <div class="victory" id="victory">
         <h2>🎉 Congratulations! 🎉</h2>
@@ -1022,66 +684,47 @@
         <br>
         <button onclick="resetGame()">🎲 New Puzzle</button>
     </div>
-    
     <script>
-        // All available puzzles
-        const allPuzzles = [{"grid": [["E", "H", "F", "H", "J", "E", "G", "V", "B", "V", "V", "B", "O", "F", "A", "A", "N", "Y", "I", "W", "I", "N", "K", "L", "V"], ["F", "Q", "C", "S", "X", "O", "L", "V", "H", "I", "F", "B", "V", "M", "M", "P", "O", "H", "D", "Z", "L", "U", "P", "O", "O"], ["D", "J", "U", "P", "Q", "L", "P", "F", "K", "S", "O", "L", "L", "A", "T", "M", "R", "X", "E", "V", "U", "J", "K", "T", "U"], ["C", "F", "X", "E", "N", "U", "M", "N", "J", "I", "Y", "L", "L", "O", "E", "I", "B", "V", "R", "Z", "C", "E", "I", "N", "Z"], ["T", "L", "V", "S", "E", "T", "Y", "N", "K", "O", "U", "K", "J", "W", "C", "T", "R", "R", "Q", "Q", "S", "N", "W", "E", "Z"], ["C", "V", "P", "Y", "U", "D", "V", "D", "T", "N", "F", "W", "A", "O", "W", "I", "E", "O", "A", "E", "P", "O", "S", "M", "L"], ["Y", "K", "W", "G", "R", "K", "Q", "N", "R", "E", "B", "I", "N", "D", "O", "E", "M", "R", "G", "P", "Z", "I", "L", "A", "R"], ["F", "O", "Z", "Q", "O", "D", "E", "U", "A", "L", "U", "O", "E", "Z", "Y", "H", "I", "Y", "F", "L", "N", "Z", "O", "R", "M"], ["F", "W", "N", "E", "N", "Y", "Q", "I", "A", "C", "S", "E", "W", "G", "R", "T", "Q", "Q", "A", "R", "A", "A", "K", "T", "A"], ["L", "W", "X", "P", "I", "Z", "L", "T", "C", "C", "P", "B", "K", "O", "H", "C", "T", "X", "D", "H", "P", "C", "Q", "S", "C"], ["X", "A", "R", "Y", "Q", "X", "G", "P", "I", "Q", "A", "M", "L", "K", "A", "J", "K", "P", "G", "R", "J", "I", "V", "E", "H"], ["W", "U", "T", "G", "Q", "M", "G", "M", "M", "Z", "G", "E", "C", "H", "A", "E", "G", "M", "E", "Q", "J", "F", "K", "D", "I"], ["L", "A", "E", "O", "D", "H", "E", "U", "N", "L", "M", "H", "K", "F", "E", "J", "I", "D", "N", "L", "I", "I", "C", "D", "N"], ["N", "P", "N", "O", "L", "N", "O", "V", "I", "T", "A", "R", "E", "N", "E", "G", "I", "Q", "C", "D", "H", "S", "E", "A", "E"], ["M", "Y", "C", "A", "T", "L", "G", "X", "V", "Q", "N", "D", "F", "Z", "Y", "Z", "P", "Q", "P", "D", "S", "S", "T", "A", "L"], ["O", "U", "Q", "O", "Y", "X", "E", "E", "U", "E", "J", "A", "I", "E", "I", "T", "O", "B", "O", "R", "D", "A", "D", "R", "E"], ["I", "V", "Y", "L", "J", "V", "Z", "D", "B", "F", "D", "T", "B", "O", "N", "C", "F", "E", "N", "P", "O", "L", "D", "T", "A"], ["Z", "R", "D", "G", "D", "X", "Y", "P", "O", "B", "Q", "I", "N", "O", "A", "L", "Y", "P", "V", "Z", "V", "C", "Q", "I", "R"], ["J", "E", "A", "R", "E", "I", "S", "T", "O", "M", "P", "E", "L", "O", "I", "G", "G", "A", "U", "G", "N", "I", "L", "F", "N"], ["T", "O", "K", "E", "N", "D", "O", "I", "G", "O", "A", "B", "N", "E", "H", "X", "I", "W", "J", "P", "M", "P", "T", "I", "I"], ["U", "G", "I", "N", "T", "E", "L", "L", "I", "G", "E", "N", "Z", "A", "G", "E", "Y", "K", "X", "D", "I", "A", "A", "C", "N"], ["E", "A", "X", "I", "N", "T", "E", "J", "T", "S", "E", "R", "O", "F", "M", "O", "D", "N", "A", "R", "W", "G", "R", "I", "G"], ["C", "T", "I", "R", "L", "G", "E", "Z", "E", "W", "N", "N", "G", "X", "L", "B", "B", "A", "B", "S", "H", "A", "K", "A", "I"], ["A", "U", "T", "O", "M", "A", "Z", "I", "O", "N", "E", "J", "I", "B", "Q", "K", "B", "G", "K", "X", "G", "Y", "R", "L", "B"], ["X", "T", "I", "M", "P", "G", "J", "G", "D", "Z", "G", "N", "P", "H", "J", "G", "A", "M", "B", "G", "A", "G", "U", "E", "Y"]], "words": {"RETE": [[6, 17], [5, 16], [4, 15], [3, 14]], "DEEP": [[6, 13], [7, 12], [8, 11], [9, 10]], "ALGORITMO": [[8, 20], [7, 19], [6, 18], [5, 17], [4, 16], [3, 15], [2, 14], [1, 13], [0, 12]], "PREDIZIONE": [[9, 20], [10, 19], [11, 18], [12, 17], [13, 16], [14, 15], [15, 14], [16, 13], [17, 12], [18, 11]], "MODELLO": [[18, 9], [17, 8], [16, 7], [15, 6], [14, 5], [13, 4], [12, 3]], "RICONOSCIMENTO": [[2, 16], [3, 15], [4, 14], [5, 13], [6, 12], [7, 11], [8, 10], [9, 9], [10, 8], [11, 7], [12, 6], [13, 5], [14, 4], [15, 3]], "GENERATIVO": [[13, 15], [13, 14], [13, 13], [13, 12], [13, 11], [13, 10], [13, 9], [13, 8], [13, 7], [13, 6]], "LINGUAGGIO": [[18, 22], [18, 21], [18, 20], [18, 19], [18, 18], [18, 17], [18, 16], [18, 15], [18, 14], [18, 13]], "TOKEN": [[19, 0], [19, 1], [19, 2], [19, 3], [19, 4]], "AUTOMAZIONE": [[23, 0], [23, 1], [23, 2], [23, 3], [23, 4], [23, 5], [23, 6], [23, 7], [23, 8], [23, 9], [23, 10]], "RANDOMFOREST": [[21, 19], [21, 18], [21, 17], [21, 16], [21, 15], [21, 14], [21, 13], [21, 12], [21, 11], [21, 10], [21, 9], [21, 8]], "ROBOT": [[15, 19], [15, 18], [15, 17], [15, 16], [15, 15]], "ADDESTRAMENTO": [[13, 23], [12, 23], [11, 23], [10, 23], [9, 23], [8, 23], [7, 23], [6, 23], [5, 23], [4, 23], [3, 23], [2, 23], [1, 23]], "ARTIFICIALE": [[14, 23], [15, 23], [16, 23], [17, 23], [18, 23], [19, 23], [20, 23], [21, 23], [22, 23], [23, 23], [24, 23]], "MACHINELEARNING": [[7, 24], [8, 24], [9, 24], [10, 24], [11, 24], [12, 24], [13, 24], [14, 24], [15, 24], [16, 24], [17, 24], [18, 24], [19, 24], [20, 24], [21, 24]], "NEURONI": [[3, 4], [4, 4], [5, 4], [6, 4], [7, 4], [8, 4], [9, 4]], "VISIONE": [[0, 9], [1, 9], [2, 9], [3, 9], [4, 9], [5, 9], [6, 9]], "CLASSIFICAZIONE": [[17, 21], [16, 21], [15, 21], [14, 21], [13, 21], [12, 21], [11, 21], [10, 21], [9, 21], [8, 21], [7, 21], [6, 21], [5, 21], [4, 21], [3, 21]], "INTELLIGENZA": [[20, 2], [20, 3], [20, 4], [20, 5], [20, 6], [20, 7], [20, 8], [20, 9], [20, 10], [20, 11], [20, 12], [20, 13]], "DATI": [[14, 11], [15, 11], [16, 11], [17, 11]]}}];
+        const allPuzzles = [{"grid": [["Z", "V", "E", "G", "C", "L", "A", "S", "S", "I", "F", "I", "C", "A", "Z", "I", "O", "N", "E", "E"], ["Q", "A", "T", "O", "W", "B", "F", "G", "B", "R", "P", "U", "R", "G", "Q", "N", "B", "X", "I", "R"], ["M", "N", "E", "T", "M", "F", "P", "U", "Y", "U", "O", "E", "H", "R", "B", "N", "N", "I", "I", "O"], ["M", "R", "E", "N", "R", "D", "A", "T", "I", "T", "T", "B", "O", "Q", "X", "X", "Z", "C", "O", "V"], ["A", "N", "O", "E", "Z", "A", "W", "T", "I", "E", "E", "L", "O", "X", "V", "N", "O", "P", "I", "I"], ["C", "P", "G", "M", "F", "O", "W", "K", "S", "E", "F", "P", "M", "T", "E", "N", "G", "H", "G", "T"], ["H", "I", "Q", "A", "I", "S", "O", "Y", "B", "Q", "K", "E", "U", "G", "O", "H", "O", "F", "G", "A"], ["I", "N", "O", "R", "U", "E", "N", "P", "B", "J", "W", "E", "Y", "S", "A", "J", "L", "K", "A", "R"], ["N", "K", "L", "T", "A", "Q", "E", "V", "F", "J", "S", "D", "C", "W", "P", "N", "L", "S", "U", "E"], ["E", "O", "V", "S", "Z", "N", "K", "T", "O", "O", "E", "I", "E", "R", "U", "C", "E", "R", "G", "N"], ["L", "M", "L", "E", "N", "P", "O", "D", "W", "Y", "M", "L", "H", "N", "N", "B", "D", "R", "N", "E"], ["E", "T", "O", "D", "E", "R", "T", "B", "B", "E", "A", "I", "B", "R", "F", "A", "O", "N", "I", "G"], ["A", "I", "V", "D", "G", "E", "T", "K", "N", "I", "G", "V", "M", "M", "L", "O", "M", "X", "L", "Q"], ["R", "R", "Z", "A", "I", "D", "M", "T", "C", "O", "J", "J", "I", "V", "W", "G", "N", "D", "W", "R"], ["N", "O", "F", "G", "L", "I", "O", "I", "Y", "M", "K", "I", "W", "S", "L", "C", "Z", "E", "B", "D"], ["I", "G", "Z", "G", "L", "Z", "F", "V", "R", "T", "Q", "T", "M", "C", "I", "Z", "X", "B", "H", "B"], ["N", "L", "R", "J", "E", "I", "N", "F", "R", "A", "N", "D", "O", "M", "F", "O", "R", "E", "S", "T"], ["G", "A", "K", "E", "T", "O", "F", "D", "P", "G", "V", "D", "D", "B", "L", "S", "N", "R", "W", "D"], ["E", "W", "N", "R", "N", "N", "Y", "T", "X", "B", "J", "C", "H", "N", "Y", "Q", "L", "E", "W", "O"], ["P", "U", "A", "O", "I", "E", "H", "E", "N", "O", "I", "Z", "A", "M", "O", "T", "U", "A", "K", "O"]], "words": {"DATI": [[3, 5], [3, 6], [3, 7], [3, 8]], "MODELLO": [[12, 16], [11, 16], [10, 16], [9, 16], [8, 16], [7, 16], [6, 16]], "NEURONI": [[7, 6], [7, 5], [7, 4], [7, 3], [7, 2], [7, 1], [7, 0]], "PREDIZIONE": [[10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [17, 5], [18, 5], [19, 5]], "DEEP": [[8, 11], [7, 11], [6, 11], [5, 11]], "RICONOSCIMENTO": [[1, 19], [2, 18], [3, 17], [4, 16], [5, 15], [6, 14], [7, 13], [8, 12], [9, 11], [10, 10], [11, 9], [12, 8], [13, 7], [14, 6]], "RANDOMFOREST": [[16, 8], [16, 9], [16, 10], [16, 11], [16, 12], [16, 13], [16, 14], [16, 15], [16, 16], [16, 17], [16, 18], [16, 19]], "ADDESTRAMENTO": [[13, 3], [12, 3], [11, 3], [10, 3], [9, 3], [8, 3], [7, 3], [6, 3], [5, 3], [4, 3], [3, 3], [2, 3], [1, 3]], "MACHINELEARNING": [[3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [12, 0], [13, 0], [14, 0], [15, 0], [16, 0], [17, 0]], "ARTIFICIALE": [[19, 2], [18, 3], [17, 4], [16, 5], [15, 6], [14, 7], [13, 8], [12, 9], [11, 10], [10, 11], [9, 12]], "LINGUAGGIO": [[12, 18], [11, 18], [10, 18], [9, 18], [8, 18], [7, 18], [6, 18], [5, 18], [4, 18], [3, 18]], "GENERATIVO": [[11, 19], [10, 19], [9, 19], [8, 19], [7, 19], [6, 19], [5, 19], [4, 19], [3, 19], [2, 19]], "RETE": [[1, 12], [2, 11], [3, 10], [4, 9]], "CLASSIFICAZIONE": [[0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11], [0, 12], [0, 13], [0, 14], [0, 15], [0, 16], [0, 17], [0, 18]], "ALGORITMO": [[17, 1], [16, 1], [15, 1], [14, 1], [13, 1], [12, 1], [11, 1], [10, 1], [9, 1]], "VISIONE": [[12, 11], [13, 12], [14, 13], [15, 14], [16, 15], [17, 16], [18, 17]], "ROBOT": [[1, 9], [2, 10], [3, 11], [4, 12], [5, 13]], "TOKEN": [[11, 6], [10, 6], [9, 6], [8, 6], [7, 6]], "INTELLIGENZA": [[19, 4], [18, 4], [17, 4], [16, 4], [15, 4], [14, 4], [13, 4], [12, 4], [11, 4], [10, 4], [9, 4], [8, 4]], "AUTOMAZIONE": [[19, 17], [19, 16], [19, 15], [19, 14], [19, 13], [19, 12], [19, 11], [19, 10], [19, 9], [19, 8], [19, 7]]}}, {"grid": [["I", "E", "B", "F", "O", "J", "B", "I", "C", "L", "G", "J", "N", "Z", "V", "T", "C", "S", "V", "C"], ["R", "O", "H", "V", "I", "S", "I", "O", "N", "E", "I", "E", "X", "X", "J", "S", "G", "N", "N", "M"], ["X", "M", "L", "O", "H", "F", "I", "F", "W", "H", "J", "N", "N", "R", "H", "N", "V", "D", "X", "A"], ["F", "T", "R", "Z", "L", "Y", "M", "N", "Y", "K", "P", "T", "G", "E", "X", "R", "G", "L", "Z", "L"], ["O", "I", "B", "Q", "L", "L", "E", "T", "Q", "J", "O", "S", "M", "U", "R", "E", "A", "N", "E", "A"], ["T", "R", "A", "V", "D", "K", "E", "N", "K", "M", "G", "M", "K", "F", "A", "A", "E", "Y", "E", "G"], ["N", "O", "R", "K", "O", "K", "V", "D", "O", "G", "F", "R", "C", "T", "E", "G", "T", "S", "N", "U"], ["E", "G", "T", "T", "H", "Z", "S", "U", "O", "I", "Y", "I", "S", "N", "I", "R", "G", "I", "O", "M"], ["M", "L", "I", "X", "I", "P", "S", "X", "P", "M", "Z", "E", "O", "L", "H", "T", "N", "I", "V", "A"], ["I", "A", "F", "M", "M", "T", "O", "B", "O", "R", "R", "I", "L", "I", "S", "R", "A", "S", "O", "O"], ["C", "Y", "I", "N", "O", "R", "U", "E", "N", "O", "Z", "E", "D", "F", "A", "S", "V", "S", "P", "B"], ["S", "U", "C", "E", "S", "W", "L", "K", "F", "A", "T", "M", "L", "E", "Y", "A", "H", "Q", "V", "V"], ["O", "R", "I", "J", "Z", "U", "G", "M", "M", "N", "C", "S", "L", "U", "R", "U", "K", "P", "J", "B"], ["N", "E", "A", "W", "W", "U", "O", "O", "I", "S", "N", "E", "C", "P", "W", "P", "B", "N", "Q", "P"], ["O", "T", "L", "B", "W", "D", "T", "P", "K", "C", "N", "H", "E", "F", "V", "V", "W", "D", "Y", "K"], ["C", "E", "E", "A", "N", "U", "S", "B", "L", "I", "O", "E", "T", "I", "D", "E", "A", "U", "K", "R"], ["I", "J", "L", "A", "A", "Q", "Z", "Z", "H", "T", "D", "Z", "L", "H", "P", "T", "L", "U", "D", "N"], ["R", "Z", "R", "F", "M", "B", "L", "C", "I", "K", "Z", "H", "Y", "X", "I", "X", "W", "O", "R", "F"], ["E", "W", "J", "L", "C", "L", "A", "S", "S", "I", "F", "I", "C", "A", "Z", "I", "O", "N", "E", "F"], ["A", "O", "T", "N", "E", "M", "A", "R", "T", "S", "E", "D", "D", "A", "N", "C", "Y", "N", "M", "A"]], "words": {"RANDOMFOREST": [[17, 2], [16, 3], [15, 4], [14, 5], [13, 6], [12, 7], [11, 8], [10, 9], [9, 10], [8, 11], [7, 12], [6, 13]], "TOKEN": [[7, 3], [6, 4], [5, 5], [4, 6], [3, 7]], "RETE": [[12, 1], [13, 1], [14, 1], [15, 1]], "ROBOT": [[9, 9], [9, 8], [9, 7], [9, 6], [9, 5]], "RICONOSCIMENTO": [[17, 0], [16, 0], [15, 0], [14, 0], [13, 0], [12, 0], [11, 0], [10, 0], [9, 0], [8, 0], [7, 0], [6, 0], [5, 0], [4, 0]], "ALGORITMO": [[9, 1], [8, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1], [2, 1], [1, 1]], "ARTIFICIALE": [[5, 2], [6, 2], [7, 2], [8, 2], [9, 2], [10, 2], [11, 2], [12, 2], [13, 2], [14, 2], [15, 2]], "AUTOMAZIONE": [[16, 4], [15, 5], [14, 6], [13, 7], [12, 8], [11, 9], [10, 10], [9, 11], [8, 12], [7, 13], [6, 14]], "GENERATIVO": [[0, 10], [1, 11], [2, 12], [3, 13], [4, 14], [5, 15], [6, 16], [7, 17], [8, 18], [9, 19]], "LINGUAGGIO": [[0, 9], [1, 10], [2, 11], [3, 12], [4, 13], [5, 14], [6, 15], [7, 16], [8, 17], [9, 18]], "DATI": [[14, 17], [15, 16], [16, 15], [17, 14]], "INTELLIGENZA": [[13, 8], [12, 9], [11, 10], [10, 11], [9, 12], [8, 13], [7, 14], [6, 15], [5, 16], [4, 17], [3, 18], [2, 19]], "PREDIZIONE": [[13, 15], [12, 14], [11, 13], [10, 12], [9, 11], [8, 10], [7, 9], [6, 8], [5, 7], [4, 6]], "MACHINELEARNING": [[19, 5], [18, 6], [17, 7], [16, 8], [15, 9], [14, 10], [13, 11], [12, 12], [11, 13], [10, 14], [9, 15], [8, 16], [7, 17], [6, 18], [5, 19]], "MODELLO": [[8, 9], [7, 8], [6, 7], [5, 6], [4, 5], [3, 4], [2, 3]], "DEEP": [[16, 10], [15, 11], [14, 12], [13, 13]], "ADDESTRAMENTO": [[19, 13], [19, 12], [19, 11], [19, 10], [19, 9], [19, 8], [19, 7], [19, 6], [19, 5], [19, 4], [19, 3], [19, 2], [19, 1]], "CLASSIFICAZIONE": [[18, 4], [18, 5], [18, 6], [18, 7], [18, 8], [18, 9], [18, 10], [18, 11], [18, 12], [18, 13], [18, 14], [18, 15], [18, 16], [18, 17], [18, 18]], "NEURONI": [[10, 8], [10, 7], [10, 6], [10, 5], [10, 4], [10, 3], [10, 2]], "VISIONE": [[1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9]]}}, {"grid": [["T", "A", "O", "B", "T", "D", "F", "J", "R", "A", "N", "D", "O", "M", "F", "O", "R", "E", "S", "T"], ["L", "D", "F", "A", "W", "D", "N", "G", "K", "E", "X", "G", "A", "I", "K", "R", "S", "C", "H", "W"], ["V", "D", "L", "P", "N", "M", "Y", "S", "D", "Q", "T", "A", "T", "O", "K", "E", "N", "R", "E", "O"], ["C", "E", "G", "X", "H", "Z", "N", "P", "N", "Z", "B", "E", "G", "G", "E", "G", "H", "G", "Q", "T"], ["S", "S", "D", "N", "L", "U", "F", "G", "X", "R", "O", "S", "R", "M", "U", "O", "G", "G", "J", "N"], ["Y", "T", "E", "R", "I", "J", "O", "F", "A", "R", "T", "I", "F", "I", "C", "I", "A", "L", "E", "E"], ["K", "R", "H", "N", "D", "N", "I", "N", "O", "R", "U", "E", "N", "H", "Y", "M", "I", "Y", "H", "M"], ["O", "A", "Z", "T", "O", "Q", "R", "A", "Z", "N", "E", "G", "I", "L", "L", "E", "T", "N", "I", "I"], ["L", "M", "N", "B", "F", "I", "Z", "A", "T", "D", "S", "Y", "I", "B", "D", "H", "D", "D", "H", "C"], ["I", "E", "T", "E", "D", "M", "Z", "E", "E", "D", "V", "E", "J", "K", "A", "X", "F", "B", "G", "S"], ["N", "N", "Z", "I", "N", "G", "P", "A", "G", "L", "N", "A", "Z", "Y", "T", "X", "N", "R", "E", "O"], ["G", "T", "S", "W", "R", "O", "R", "N", "C", "O", "E", "V", "G", "S", "I", "Q", "V", "Q", "N", "N"], ["U", "O", "Q", "D", "Q", "O", "I", "O", "I", "I", "J", "N", "V", "I", "S", "I", "O", "N", "E", "O"], ["A", "N", "T", "W", "E", "Q", "G", "Z", "L", "M", "F", "H", "I", "X", "Y", "U", "H", "G", "R", "C"], ["G", "M", "D", "J", "R", "E", "I", "L", "A", "L", "Q", "I", "O", "H", "I", "K", "E", "V", "A", "I"], ["G", "B", "B", "Q", "I", "D", "P", "F", "A", "M", "E", "U", "S", "H", "C", "K", "P", "Y", "T", "R"], ["I", "D", "I", "B", "E", "W", "G", "E", "T", "G", "O", "D", "I", "S", "Z", "A", "D", "V", "I", "R"], ["O", "C", "G", "R", "F", "Z", "T", "O", "B", "O", "R", "T", "O", "Q", "A", "X", "M", "M", "V", "K"], ["P", "F", "P", "N", "T", "B", "U", "P", "W", "N", "V", "G", "U", "M", "K", "L", "E", "D", "O", "W"], ["X", "L", "M", "E", "U", "B", "F", "L", "V", "E", "B", "N", "G", "A", "G", "G", "C", "R", "I", "N"]], "words": {"PREDIZIONE": [[18, 2], [17, 3], [16, 4], [15, 5], [14, 6], [13, 7], [12, 8], [11, 9], [10, 10], [9, 11]], "INTELLIGENZA": [[7, 18], [7, 17], [7, 16], [7, 15], [7, 14], [7, 13], [7, 12], [7, 11], [7, 10], [7, 9], [7, 8], [7, 7]], "ALGORITMO": [[15, 8], [14, 7], [13, 6], [12, 5], [11, 4], [10, 3], [9, 2], [8, 1], [7, 0]], "NEURONI": [[6, 12], [6, 11], [6, 10], [6, 9], [6, 8], [6, 7], [6, 6]], "MACHINELEARNING": [[17, 16], [16, 15], [15, 14], [14, 13], [13, 12], [12, 11], [11, 10], [10, 9], [9, 8], [8, 7], [7, 6], [6, 5], [5, 4], [4, 3], [3, 2]], "RICONOSCIMENTO": [[15, 19], [14, 19], [13, 19], [12, 19], [11, 19], [10, 19], [9, 19], [8, 19], [7, 19], [6, 19], [5, 19], [4, 19], [3, 19], [2, 19]], "VISIONE": [[12, 12], [12, 13], [12, 14], [12, 15], [12, 16], [12, 17], [12, 18]], "ADDESTRAMENTO": [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1], [12, 1]], "LINGUAGGIO": [[8, 0], [9, 0], [10, 0], [11, 0], [12, 0], [13, 0], [14, 0], [15, 0], [16, 0], [17, 0]], "CLASSIFICAZIONE": [[19, 16], [18, 15], [17, 14], [16, 13], [15, 12], [14, 11], [13, 10], [12, 9], [11, 8], [10, 7], [9, 6], [8, 5], [7, 4], [6, 3], [5, 2]], "DEEP": [[12, 3], [13, 4], [14, 5], [15, 6]], "ROBOT": [[17, 10], [17, 9], [17, 8], [17, 7], [17, 6]], "MODELLO": [[18, 13], [17, 12], [16, 11], [15, 10], [14, 9], [13, 8], [12, 7]], "TOKEN": [[2, 12], [2, 13], [2, 14], [2, 15], [2, 16]], "ARTIFICIALE": [[5, 8], [5, 9], [5, 10], [5, 11], [5, 12], [5, 13], [5, 14], [5, 15], [5, 16], [5, 17], [5, 18]], "RANDOMFOREST": [[0, 8], [0, 9], [0, 10], [0, 11], [0, 12], [0, 13], [0, 14], [0, 15], [0, 16], [0, 17], [0, 18], [0, 19]], "GENERATIVO": [[9, 18], [10, 18], [11, 18], [12, 18], [13, 18], [14, 18], [15, 18], [16, 18], [17, 18], [18, 18]], "RETE": [[4, 12], [3, 11], [2, 10], [1, 9]], "AUTOMAZIONE": [[19, 13], [18, 12], [17, 11], [16, 10], [15, 9], [14, 8], [13, 7], [12, 6], [11, 5], [10, 4], [9, 3]], "DATI": [[8, 14], [9, 14], [10, 14], [11, 14]]}}, {"grid": [["E", "G", "C", "H", "O", "D", "A", "T", "I", "Z", "M", "K", "D", "B", "P", "K", "H", "R", "U", "B"], ["R", "B", "I", "R", "I", "C", "O", "N", "O", "S", "C", "I", "M", "E", "N", "T", "O", "G", "H", "M"], ["O", "U", "K", "D", "W", "Q", "O", "L", "I", "N", "G", "U", "A", "G", "G", "I", "O", "K", "W", "A"], ["B", "L", "T", "P", "K", "R", "S", "Q", "D", "Y", "M", "Z", "Z", "K", "X", "F", "G", "S", "V", "C"], ["O", "I", "U", "U", "U", "N", "T", "O", "V", "I", "T", "A", "R", "E", "N", "E", "G", "A", "H", "H"], ["T", "E", "Y", "E", "C", "U", "R", "D", "N", "Y", "N", "A", "P", "F", "B", "D", "R", "G", "A", "I"], ["F", "N", "N", "R", "D", "D", "E", "M", "M", "C", "O", "C", "Y", "E", "Y", "T", "H", "Z", "Q", "N"], ["E", "O", "O", "A", "K", "F", "B", "A", "N", "P", "F", "M", "N", "E", "I", "Q", "N", "F", "O", "E"], ["A", "I", "L", "N", "Y", "K", "M", "T", "U", "Q", "D", "O", "T", "F", "K", "E", "J", "T", "A", "L"], ["F", "Z", "L", "D", "W", "G", "O", "M", "U", "T", "I", "T", "I", "I", "G", "Z", "N", "D", "V", "E"], ["P", "A", "E", "O", "G", "W", "E", "X", "P", "S", "O", "C", "G", "I", "R", "E", "F", "J", "G", "A"], ["M", "C", "D", "M", "H", "T", "Q", "N", "I", "A", "I", "M", "L", "D", "M", "O", "W", "B", "R", "R"], ["B", "I", "O", "F", "H", "D", "O", "V", "O", "A", "J", "L", "A", "A", "N", "F", "G", "H", "N", "N"], ["T", "F", "M", "O", "S", "F", "V", "K", "L", "I", "E", "R", "R", "Z", "H", "E", "O", "L", "E", "I"], ["W", "I", "D", "R", "R", "E", "T", "E", "E", "T", "Z", "T", "L", "F", "I", "C", "H", "V", "A", "N"], ["F", "S", "N", "E", "G", "C", "A", "T", "N", "N", "S", "I", "X", "F", "E", "O", "B", "A", "T", "G"], ["B", "S", "L", "S", "E", "G", "S", "I", "Y", "E", "N", "P", "D", "G", "T", "R", "N", "U", "T", "W"], ["N", "A", "T", "T", "C", "P", "Z", "R", "D", "H", "S", "G", "R", "E", "E", "J", "U", "E", "E", "A"], ["W", "L", "G", "S", "A", "O", "I", "D", "H", "F", "Y", "Q", "N", "S", "R", "C", "F", "A", "C", "H"], ["G", "C", "Y", "W", "V", "D", "A", "Z", "K", "N", "F", "D", "F", "Q", "E", "P", "C", "I", "N", "M"]], "words": {"RICONOSCIMENTO": [[1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [1, 11], [1, 12], [1, 13], [1, 14], [1, 15], [1, 16]], "RANDOMFOREST": [[6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [11, 3], [12, 3], [13, 3], [14, 3], [15, 3], [16, 3], [17, 3]], "ADDESTRAMENTO": [[19, 6], [18, 7], [17, 8], [16, 9], [15, 10], [14, 11], [13, 12], [12, 13], [11, 14], [10, 15], [9, 16], [8, 17], [7, 18]], "ALGORITMO": [[14, 18], [13, 17], [12, 16], [11, 15], [10, 14], [9, 13], [8, 12], [7, 11], [6, 10]], "DATI": [[0, 5], [0, 6], [0, 7], [0, 8]], "TOKEN": [[11, 5], [12, 6], [13, 7], [14, 8], [15, 9]], "CLASSIFICAZIONE": [[19, 1], [18, 1], [17, 1], [16, 1], [15, 1], [14, 1], [13, 1], [12, 1], [11, 1], [10, 1], [9, 1], [8, 1], [7, 1], [6, 1], [5, 1]], "MODELLO": [[13, 2], [12, 2], [11, 2], [10, 2], [9, 2], [8, 2], [7, 2]], "AUTOMAZIONE": [[7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13], [14, 14], [15, 15], [16, 16], [17, 17]], "GENERATIVO": [[4, 16], [4, 15], [4, 14], [4, 13], [4, 12], [4, 11], [4, 10], [4, 9], [4, 8], [4, 7]], "DEEP": [[14, 2], [15, 3], [16, 4], [17, 5]], "INTELLIGENZA": [[16, 7], [15, 8], [14, 9], [13, 10], [12, 11], [11, 12], [10, 13], [9, 14], [8, 15], [7, 16], [6, 17], [5, 18]], "ROBOT": [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0]], "MACHINELEARNING": [[1, 19], [2, 19], [3, 19], [4, 19], [5, 19], [6, 19], [7, 19], [8, 19], [9, 19], [10, 19], [11, 19], [12, 19], [13, 19], [14, 19], [15, 19]], "PREDIZIONE": [[19, 15], [18, 14], [17, 13], [16, 12], [15, 11], [14, 10], [13, 9], [12, 8], [11, 7], [10, 6]], "VISIONE": [[12, 7], [11, 8], [10, 9], [9, 10], [8, 11], [7, 12], [6, 13]], "RETE": [[14, 4], [14, 5], [14, 6], [14, 7]], "LINGUAGGIO": [[2, 7], [2, 8], [2, 9], [2, 10], [2, 11], [2, 12], [2, 13], [2, 14], [2, 15], [2, 16]], "ARTIFICIALE": [[4, 17], [5, 16], [6, 15], [7, 14], [8, 13], [9, 12], [10, 11], [11, 10], [12, 9], [13, 8], [14, 7]], "NEURONI": [[6, 2], [5, 3], [4, 4], [3, 5], [2, 6], [1, 7], [0, 8]]}}, {"grid": [["D", "V", "S", "A", "E", "D", "C", "M", "R", "U", "S", "D", "H", "G", "X", "K", "S", "G", "T", "K"], ["J", "Y", "P", "B", "C", "S", "I", "J", "N", "Y", "P", "I", "N", "I", "L", "B", "L", "S", "O", "C"], ["P", "Y", "M", "Z", "R", "L", "N", "F", "Y", "S", "L", "I", "E", "T", "O", "N", "E", "G", "E", "R"], ["S", "B", "U", "K", "N", "E", "A", "C", "S", "A", "M", "N", "N", "H", "N", "R", "I", "W", "N", "D"], ["M", "A", "J", "K", "K", "E", "T", "S", "G", "Y", "O", "R", "A", "O", "O", "C", "G", "M", "O", "E"], ["H", "Z", "P", "D", "E", "F", "A", "E", "S", "I", "T", "R", "Q", "F", "R", "E", "U", "N", "I", "M"], ["U", "X", "E", "Q", "S", "O", "N", "D", "Z", "I", "T", "B", "M", "J", "N", "U", "Z", "Q", "S", "A"], ["A", "X", "E", "W", "I", "E", "T", "A", "D", "I", "F", "O", "R", "E", "P", "M", "E", "I", "I", "C"], ["I", "L", "D", "P", "K", "X", "M", "N", "F", "E", "D", "I", "R", "C", "O", "Q", "U", "N", "V", "H"], ["N", "K", "G", "A", "B", "O", "R", "I", "E", "N", "S", "A", "C", "D", "W", "D", "Q", "M", "R", "I"], ["T", "P", "T", "O", "T", "L", "C", "U", "A", "M", "T", "T", "E", "A", "W", "O", "A", "I", "O", "N"], ["E", "J", "R", "U", "R", "I", "I", "R", "F", "I", "I", "L", "R", "G", "Z", "Q", "D", "T", "K", "E"], ["L", "B", "A", "E", "A", "I", "D", "N", "V", "N", "L", "C", "L", "A", "K", "I", "Q", "J", "I", "L"], ["L", "M", "Y", "L", "D", "N", "T", "O", "G", "O", "E", "I", "S", "X", "M", "W", "O", "N", "W", "E"], ["I", "M", "E", "D", "N", "I", "N", "M", "Y", "U", "S", "K", "X", "O", "Q", "E", "L", "N", "D", "A"], ["G", "H", "H", "C", "G", "Z", "Z", "X", "O", "P", "A", "I", "O", "P", "N", "O", "N", "A", "E", "R"], ["E", "F", "R", "O", "B", "O", "T", "I", "T", "P", "W", "G", "N", "T", "W", "O", "A", "T", "E", "N"], ["N", "Q", "B", "M", "W", "O", "V", "K", "O", "Y", "E", "T", "G", "G", "Z", "L", "C", "A", "O", "I"], ["Z", "W", "O", "V", "W", "F", "P", "F", "P", "N", "Z", "G", "R", "I", "W", "D", "L", "I", "Q", "N"], ["A", "G", "Q", "X", "Z", "R", "C", "I", "L", "V", "E", "J", "O", "Z", "O", "S", "O", "P", "R", "G"]], "words": {"RANDOMFOREST": [[11, 7], [10, 8], [9, 9], [8, 10], [7, 11], [6, 12], [5, 13], [4, 14], [3, 15], [2, 16], [1, 17], [0, 18]], "DATI": [[9, 15], [10, 16], [11, 17], [12, 18]], "CLASSIFICAZIONE": [[1, 4], [2, 5], [3, 6], [4, 7], [5, 8], [6, 9], [7, 10], [8, 11], [9, 12], [10, 13], [11, 14], [12, 15], [13, 16], [14, 17], [15, 18]], "DEEP": [[8, 2], [7, 2], [6, 2], [5, 2]], "LINGUAGGIO": [[10, 5], [11, 6], [12, 7], [13, 8], [14, 9], [15, 10], [16, 11], [17, 12], [18, 13], [19, 14]], "RICONOSCIMENTO": [[19, 18], [18, 17], [17, 16], [16, 15], [15, 14], [14, 13], [13, 12], [12, 11], [11, 10], [10, 9], [9, 8], [8, 7], [7, 6], [6, 5]], "ROBOT": [[16, 2], [16, 3], [16, 4], [16, 5], [16, 6]], "ARTIFICIALE": [[4, 12], [5, 11], [6, 10], [7, 9], [8, 8], [9, 7], [10, 6], [11, 5], [12, 4], [13, 3], [14, 2]], "VISIONE": [[8, 18], [7, 18], [6, 18], [5, 18], [4, 18], [3, 18], [2, 18]], "ADDESTRAMENTO": [[5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14], [14, 15], [15, 16], [16, 17], [17, 18]], "PREDIZIONE": [[10, 1], [11, 2], [12, 3], [13, 4], [14, 5], [15, 6], [16, 7], [17, 8], [18, 9], [19, 10]], "MODELLO": [[7, 15], [8, 14], [9, 13], [10, 12], [11, 11], [12, 10], [13, 9]], "TOKEN": [[16, 13], [15, 12], [14, 11], [13, 10], [12, 9]], "ALGORITMO": [[7, 0], [8, 1], [9, 2], [10, 3], [11, 4], [12, 5], [13, 6], [14, 7], [15, 8]], "GENERATIVO": [[4, 16], [5, 15], [6, 14], [7, 13], [8, 12], [9, 11], [10, 10], [11, 9], [12, 8], [13, 7]], "MACHINELEARNING": [[5, 19], [6, 19], [7, 19], [8, 19], [9, 19], [10, 19], [11, 19], [12, 19], [13, 19], [14, 19], [15, 19], [16, 19], [17, 19], [18, 19], [19, 19]], "NEURONI": [[8, 17], [7, 16], [6, 15], [5, 14], [4, 13], [3, 12], [2, 11]], "RETE": [[2, 4], [3, 5], [4, 6], [5, 7]], "AUTOMAZIONE": [[12, 2], [11, 3], [10, 4], [9, 5], [8, 6], [7, 7], [6, 8], [5, 9], [4, 10], [3, 11], [2, 12]], "INTELLIGENZA": [[8, 0], [9, 0], [10, 0], [11, 0], [12, 0], [13, 0], [14, 0], [15, 0], [16, 0], [17, 0], [18, 0], [19, 0]]}}, {"grid": [["L", "W", "R", "B", "P", "H", "J", "L", "X", "A", "L", "G", "O", "R", "I", "T", "M", "O", "U", "E"], ["I", "A", "C", "W", "W", "S", "M", "Y", "F", "S", "B", "O", "S", "T", "I", "N", "A", "R", "Y", "N"], ["N", "D", "G", "C", "N", "R", "O", "F", "R", "Q", "T", "B", "B", "I", "R", "O", "B", "O", "T", "M"], ["G", "D", "Z", "F", "J", "A", "D", "C", "F", "N", "T", "P", "E", "Q", "U", "C", "W", "J", "A", "Z"], ["U", "E", "I", "A", "I", "N", "E", "N", "O", "I", "S", "I", "V", "F", "V", "T", "D", "C", "F", "S"], ["A", "S", "Z", "R", "X", "D", "L", "I", "H", "L", "G", "H", "S", "W", "D", "I", "H", "E", "X", "Z"], ["G", "T", "X", "T", "T", "O", "L", "J", "V", "B", "M", "H", "E", "V", "N", "I", "I", "F", "K", "J"], ["G", "R", "U", "I", "T", "M", "O", "E", "Y", "X", "R", "A", "F", "O", "N", "N", "U", "Z", "C", "S"], ["I", "A", "Y", "F", "S", "F", "M", "V", "B", "U", "V", "W", "R", "E", "T", "B", "A", "N", "E", "T"], ["O", "M", "Z", "I", "V", "O", "S", "Z", "I", "P", "T", "U", "L", "E", "I", "T", "Z", "T", "N", "D"], ["F", "E", "G", "C", "J", "R", "L", "R", "M", "T", "E", "E", "L", "M", "P", "R", "Y", "H", "O", "A"], ["M", "N", "G", "I", "Z", "E", "M", "Z", "U", "N", "A", "L", "Z", "N", "A", "R", "U", "D", "I", "T"], ["H", "T", "F", "A", "E", "S", "S", "E", "K", "R", "I", "R", "E", "K", "N", "Q", "L", "J", "Z", "I"], ["M", "O", "H", "L", "S", "T", "T", "O", "N", "G", "I", "K", "E", "G", "V", "G", "D", "V", "A", "Q"], ["P", "P", "U", "E", "L", "E", "Z", "I", "E", "E", "O", "O", "I", "N", "R", "Y", "M", "M", "M", "W"], ["G", "E", "U", "F", "R", "Y", "N", "N", "O", "T", "X", "M", "J", "F", "E", "Q", "G", "W", "O", "L"], ["B", "E", "P", "T", "T", "G", "Z", "K", "I", "E", "P", "C", "C", "D", "E", "G", "B", "I", "T", "K"], ["O", "D", "Z", "M", "T", "A", "Q", "J", "E", "N", "O", "I", "Z", "I", "D", "E", "R", "P", "U", "K"], ["O", "T", "N", "E", "M", "I", "C", "S", "O", "N", "O", "C", "I", "R", "I", "A", "B", "S", "A", "A"], ["K", "E", "N", "O", "I", "Z", "A", "C", "I", "F", "I", "S", "S", "A", "L", "C", "X", "I", "O", "H"]], "words": {"TOKEN": [[15, 9], [14, 10], [13, 11], [12, 12], [11, 13]], "ROBOT": [[2, 14], [2, 15], [2, 16], [2, 17], [2, 18]], "ARTIFICIALE": [[4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [11, 3], [12, 3], [13, 3], [14, 3]], "RETE": [[15, 4], [14, 5], [13, 6], [12, 7]], "MODELLO": [[1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6]], "DEEP": [[17, 1], [16, 1], [15, 1], [14, 1]], "AUTOMAZIONE": [[18, 18], [17, 18], [16, 18], [15, 18], [14, 18], [13, 18], [12, 18], [11, 18], [10, 18], [9, 18], [8, 18]], "LINGUAGGIO": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0]], "CLASSIFICAZIONE": [[19, 15], [19, 14], [19, 13], [19, 12], [19, 11], [19, 10], [19, 9], [19, 8], [19, 7], [19, 6], [19, 5], [19, 4], [19, 3], [19, 2], [19, 1]], "VISIONE": [[4, 12], [4, 11], [4, 10], [4, 9], [4, 8], [4, 7], [4, 6]], "GENERATIVO": [[16, 15], [15, 14], [14, 13], [13, 12], [12, 11], [11, 10], [10, 9], [9, 8], [8, 7], [7, 6]], "ADDESTRAMENTO": [[1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1], [12, 1], [13, 1]], "RANDOMFOREST": [[2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5], [11, 5], [12, 5], [13, 5]], "INTELLIGENZA": [[6, 16], [7, 15], [8, 14], [9, 13], [10, 12], [11, 11], [12, 10], [13, 9], [14, 8], [15, 7], [16, 6], [17, 5]], "RICONOSCIMENTO": [[18, 13], [18, 12], [18, 11], [18, 10], [18, 9], [18, 8], [18, 7], [18, 6], [18, 5], [18, 4], [18, 3], [18, 2], [18, 1], [18, 0]], "NEURONI": [[11, 9], [10, 10], [9, 11], [8, 12], [7, 13], [6, 14], [5, 15]], "MACHINELEARNING": [[2, 19], [3, 18], [4, 17], [5, 16], [6, 15], [7, 14], [8, 13], [9, 12], [10, 11], [11, 10], [12, 9], [13, 8], [14, 7], [15, 6], [16, 5]], "ALGORITMO": [[0, 9], [0, 10], [0, 11], [0, 12], [0, 13], [0, 14], [0, 15], [0, 16], [0, 17]], "PREDIZIONE": [[17, 17], [17, 16], [17, 15], [17, 14], [17, 13], [17, 12], [17, 11], [17, 10], [17, 9], [17, 8]], "DATI": [[9, 19], [10, 19], [11, 19], [12, 19]]}}, {"grid": [["I", "N", "T", "E", "L", "L", "I", "G", "E", "N", "Z", "A", "K", "E", "M", "L", "A", "T", "D", "U"], ["G", "R", "E", "K", "H", "M", "N", "B", "R", "A", "E", "B", "N", "D", "W", "L", "O", "C", "R", "M"], ["X", "I", "T", "H", "Q", "H", "A", "M", "Z", "E", "U", "O", "O", "N", "M", "K", "G", "A", "U", "L"], ["N", "O", "E", "D", "X", "R", "Z", "C", "A", "O", "I", "T", "P", "U", "E", "Y", "N", "J", "O", "D"], ["B", "V", "K", "S", "L", "X", "O", "G", "H", "S", "M", "O", "O", "N", "H", "D", "Y", "L", "M", "E"], ["O", "I", "S", "L", "R", "F", "E", "B", "I", "I", "X", "T", "A", "M", "O", "X", "H", "T", "F", "E"], ["T", "T", "L", "C", "B", "H", "N", "V", "O", "P", "N", "J", "I", "M", "A", "G", "U", "I", "U", "P"], ["N", "A", "E", "I", "W", "C", "O", "G", "D", "T", "I", "E", "F", "R", "U", "Z", "I", "O", "A", "Z"], ["E", "R", "G", "T", "M", "K", "I", "W", "F", "K", "E", "O", "L", "A", "O", "N", "I", "F", "R", "A"], ["M", "E", "F", "A", "I", "P", "Z", "L", "S", "G", "R", "A", "F", "E", "O", "G", "O", "O", "T", "R"], ["I", "N", "W", "D", "K", "R", "A", "X", "W", "E", "P", "K", "L", "R", "A", "L", "L", "V", "N", "I"], ["C", "E", "P", "S", "K", "E", "C", "D", "S", "U", "Z", "M", "U", "D", "L", "R", "Q", "A", "Y", "E"], ["S", "G", "X", "H", "K", "D", "I", "T", "Z", "A", "R", "E", "Q", "E", "R", "B", "N", "K", "F", "F"], ["O", "W", "O", "G", "D", "I", "F", "J", "V", "B", "N", "J", "D", "E", "F", "W", "I", "I", "C", "V"], ["N", "P", "E", "B", "E", "Z", "I", "J", "X", "L", "H", "O", "T", "I", "Y", "V", "Q", "N", "N", "F"], ["O", "L", "H", "V", "P", "I", "S", "R", "T", "U", "M", "E", "P", "R", "A", "F", "P", "C", "F", "G"], ["C", "G", "I", "N", "O", "O", "S", "X", "D", "P", "L", "I", "N", "G", "U", "A", "G", "G", "I", "O"], ["I", "T", "G", "O", "R", "N", "A", "V", "E", "L", "A", "I", "C", "I", "F", "I", "T", "R", "A", "E"], ["R", "K", "D", "H", "Z", "E", "L", "H", "K", "K", "Z", "S", "I", "O", "L", "X", "T", "A", "V", "P"], ["E", "K", "K", "S", "E", "N", "C", "A", "D", "D", "E", "S", "T", "R", "A", "M", "E", "N", "T", "O"]], "words": {"RETE": [[12, 14], [13, 13], [14, 12], [15, 11]], "MACHINELEARNING": [[1, 5], [2, 6], [3, 7], [4, 8], [5, 9], [6, 10], [7, 11], [8, 12], [9, 13], [10, 14], [11, 15], [12, 16], [13, 17], [14, 18], [15, 19]], "RICONOSCIMENTO": [[18, 0], [17, 0], [16, 0], [15, 0], [14, 0], [13, 0], [12, 0], [11, 0], [10, 0], [9, 0], [8, 0], [7, 0], [6, 0], [5, 0]], "ROBOT": [[3, 5], [4, 6], [5, 7], [6, 8], [7, 9]], "DATI": [[10, 3], [9, 3], [8, 3], [7, 3]], "ALGORITMO": [[11, 17], [10, 16], [9, 15], [8, 14], [7, 13], [6, 12], [5, 11], [4, 10], [3, 9]], "TOKEN": [[0, 17], [1, 16], [2, 15], [3, 14], [4, 13]], "DEEP": [[3, 19], [4, 19], [5, 19], [6, 19]], "CLASSIFICAZIONE": [[19, 6], [18, 6], [17, 6], [16, 6], [15, 6], [14, 6], [13, 6], [12, 6], [11, 6], [10, 6], [9, 6], [8, 6], [7, 6], [6, 6], [5, 6]], "ARTIFICIALE": [[17, 18], [17, 17], [17, 16], [17, 15], [17, 14], [17, 13], [17, 12], [17, 11], [17, 10], [17, 9], [17, 8]], "PREDIZIONE": [[9, 5], [10, 5], [11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [17, 5], [18, 5]], "NEURONI": [[13, 10], [12, 11], [11, 12], [10, 13], [9, 14], [8, 15], [7, 16]], "GENERATIVO": [[12, 1], [11, 1], [10, 1], [9, 1], [8, 1], [7, 1], [6, 1], [5, 1], [4, 1], [3, 1]], "MODELLO": [[15, 10], [14, 11], [13, 12], [12, 13], [11, 14], [10, 15], [9, 16]], "AUTOMAZIONE": [[1, 9], [2, 10], [3, 11], [4, 12], [5, 13], [6, 14], [7, 15], [8, 16], [9, 17], [10, 18], [11, 19]], "LINGUAGGIO": [[16, 10], [16, 11], [16, 12], [16, 13], [16, 14], [16, 15], [16, 16], [16, 17], [16, 18], [16, 19]], "VISIONE": [[6, 7], [5, 8], [4, 9], [3, 10], [2, 11], [1, 12], [0, 13]], "RANDOMFOREST": [[1, 18], [2, 17], [3, 16], [4, 15], [5, 14], [6, 13], [7, 12], [8, 11], [9, 10], [10, 9], [11, 8], [12, 7]], "ADDESTRAMENTO": [[19, 7], [19, 8], [19, 9], [19, 10], [19, 11], [19, 12], [19, 13], [19, 14], [19, 15], [19, 16], [19, 17], [19, 18], [19, 19]], "INTELLIGENZA": [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11]]}}, {"grid": [["L", "R", "K", "E", "H", "G", "E", "N", "E", "R", "A", "T", "I", "V", "O", "W", "X", "P", "S", "N"], ["V", "R", "O", "B", "O", "T", "E", "R", "D", "Z", "L", "R", "C", "W", "G", "T", "L", "R", "G", "E"], ["Y", "H", "M", "U", "H", "G", "A", "R", "D", "T", "E", "T", "O", "K", "E", "N", "A", "E", "O", "U"], ["Y", "G", "A", "O", "R", "J", "T", "E", "R", "T", "F", "W", "F", "C", "T", "N", "O", "D", "T", "R"], ["R", "H", "C", "T", "U", "W", "E", "U", "E", "B", "A", "B", "I", "H", "D", "L", "D", "I", "N", "O"], ["R", "M", "H", "N", "C", "P", "U", "K", "K", "Y", "K", "F", "K", "O", "L", "B", "X", "Z", "E", "N"], ["W", "T", "I", "E", "V", "L", "Z", "E", "F", "O", "P", "C", "M", "E", "O", "S", "D", "I", "M", "I"], ["J", "C", "N", "M", "F", "T", "A", "U", "O", "T", "Y", "F", "D", "F", "V", "C", "V", "O", "I", "A"], ["R", "K", "E", "A", "U", "A", "B", "S", "J", "B", "O", "O", "N", "J", "I", "P", "D", "N", "C", "R"], ["A", "M", "L", "R", "B", "Z", "N", "E", "S", "R", "M", "L", "L", "S", "S", "Y", "F", "E", "S", "E"], ["Z", "W", "E", "T", "X", "N", "L", "K", "E", "I", "M", "U", "X", "D", "I", "A", "H", "E", "O", "J"], ["E", "X", "A", "S", "W", "E", "E", "S", "U", "R", "F", "H", "P", "I", "O", "J", "C", "N", "N", "Y"], ["X", "E", "R", "E", "X", "G", "T", "T", "D", "C", "J", "I", "D", "O", "N", "W", "M", "A", "O", "Z"], ["P", "W", "N", "D", "B", "I", "G", "D", "W", "R", "P", "W", "C", "V", "E", "A", "R", "L", "C", "K"], ["I", "R", "I", "D", "E", "L", "P", "X", "U", "Z", "F", "A", "Y", "A", "B", "W", "L", "V", "I", "D"], ["H", "Y", "N", "A", "Z", "L", "M", "Z", "P", "V", "K", "E", "P", "I", "Z", "F", "T", "F", "R", "P"], ["J", "P", "G", "J", "Y", "E", "R", "V", "Y", "V", "A", "L", "G", "O", "R", "I", "T", "M", "O", "O"], ["R", "W", "L", "A", "U", "T", "O", "M", "A", "Z", "I", "O", "N", "E", "N", "A", "O", "F", "T", "Y"], ["L", "I", "T", "A", "D", "N", "A", "R", "T", "I", "F", "I", "C", "I", "A", "L", "E", "N", "D", "Z"], ["K", "Y", "N", "U", "E", "I", "A", "S", "L", "I", "N", "G", "U", "A", "G", "G", "I", "O", "E", "F"]], "words": {"MACHINELEARNING": [[2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [7, 2], [8, 2], [9, 2], [10, 2], [11, 2], [12, 2], [13, 2], [14, 2], [15, 2], [16, 2]], "LINGUAGGIO": [[19, 8], [19, 9], [19, 10], [19, 11], [19, 12], [19, 13], [19, 14], [19, 15], [19, 16], [19, 17]], "VISIONE": [[7, 14], [8, 14], [9, 14], [10, 14], [11, 14], [12, 14], [13, 14]], "GENERATIVO": [[0, 5], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [0, 11], [0, 12], [0, 13], [0, 14]], "DATI": [[18, 4], [18, 3], [18, 2], [18, 1]], "ROBOT": [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5]], "INTELLIGENZA": [[19, 5], [18, 5], [17, 5], [16, 5], [15, 5], [14, 5], [13, 5], [12, 5], [11, 5], [10, 5], [9, 5], [8, 5]], "RANDOMFOREST": [[1, 17], [2, 16], [3, 15], [4, 14], [5, 13], [6, 12], [7, 11], [8, 10], [9, 9], [10, 8], [11, 7], [12, 6]], "CLASSIFICAZIONE": [[5, 4], [6, 5], [7, 6], [8, 7], [9, 8], [10, 9], [11, 10], [12, 11], [13, 12], [14, 13], [15, 14], [16, 15], [17, 16], [18, 17], [19, 18]], "ARTIFICIALE": [[18, 6], [18, 7], [18, 8], [18, 9], [18, 10], [18, 11], [18, 12], [18, 13], [18, 14], [18, 15], [18, 16]], "RETE": [[1, 11], [2, 10], [3, 9], [4, 8]], "ALGORITMO": [[16, 10], [16, 11], [16, 12], [16, 13], [16, 14], [16, 15], [16, 16], [16, 17], [16, 18]], "NEURONI": [[0, 19], [1, 19], [2, 19], [3, 19], [4, 19], [5, 19], [6, 19]], "MODELLO": [[9, 10], [8, 11], [7, 12], [6, 13], [5, 14], [4, 15], [3, 16]], "AUTOMAZIONE": [[17, 3], [17, 4], [17, 5], [17, 6], [17, 7], [17, 8], [17, 9], [17, 10], [17, 11], [17, 12], [17, 13]], "RICONOSCIMENTO": [[15, 18], [14, 18], [13, 18], [12, 18], [11, 18], [10, 18], [9, 18], [8, 18], [7, 18], [6, 18], [5, 18], [4, 18], [3, 18], [2, 18]], "DEEP": [[2, 8], [3, 7], [4, 6], [5, 5]], "ADDESTRAMENTO": [[15, 3], [14, 3], [13, 3], [12, 3], [11, 3], [10, 3], [9, 3], [8, 3], [7, 3], [6, 3], [5, 3], [4, 3], [3, 3]], "PREDIZIONE": [[0, 17], [1, 17], [2, 17], [3, 17], [4, 17], [5, 17], [6, 17], [7, 17], [8, 17], [9, 17]], "TOKEN": [[2, 11], [2, 12], [2, 13], [2, 14], [2, 15]]}}, {"grid": [["Q", "E", "N", "O", "I", "Z", "A", "C", "I", "F", "I", "S", "S", "A", "L", "C", "X", "X", "B", "S"], ["D", "O", "X", "U", "A", "B", "Z", "D", "Z", "C", "E", "C", "A", "G", "F", "S", "B", "S", "C", "R"], ["I", "C", "P", "D", "G", "N", "I", "N", "R", "A", "E", "L", "E", "N", "I", "H", "C", "A", "M", "H"], ["F", "B", "Z", "O", "U", "A", "W", "G", "R", "N", "N", "E", "B", "K", "A", "T", "U", "E", "H", "U"], ["Q", "I", "A", "D", "D", "E", "S", "T", "R", "A", "M", "E", "N", "T", "O", "U", "X", "A", "N", "A"], ["U", "M", "N", "X", "R", "M", "X", "D", "G", "V", "F", "L", "P", "Z", "C", "W", "L", "W", "E", "J"], ["F", "O", "A", "T", "D", "R", "Y", "R", "A", "E", "Y", "Z", "O", "K", "U", "O", "S", "S", "N", "J"], ["O", "D", "P", "G", "E", "U", "I", "L", "A", "A", "N", "S", "W", "X", "T", "S", "S", "B", "O", "A"], ["I", "E", "S", "I", "A", "L", "S", "C", "B", "N", "G", "E", "E", "K", "P", "G", "E", "Y", "I", "L"], ["G", "L", "U", "N", "Z", "P", "L", "Z", "O", "H", "D", "N", "R", "H", "N", "F", "H", "E", "Z", "G"], ["G", "L", "M", "E", "Q", "D", "T", "I", "E", "N", "O", "O", "I", "A", "V", "D", "W", "E", "A", "O"], ["A", "O", "O", "H", "E", "R", "D", "T", "G", "I", "O", "W", "M", "I", "T", "R", "G", "T", "M", "R"], ["U", "M", "I", "E", "T", "D", "E", "O", "Z", "E", "T", "S", "S", "F", "D", "I", "O", "G", "O", "I"], ["G", "O", "P", "J", "K", "R", "I", "I", "L", "U", "N", "I", "C", "H", "O", "K", "V", "B", "T", "T"], ["N", "Z", "F", "O", "F", "N", "D", "K", "J", "G", "O", "Z", "A", "I", "E", "R", "D", "O", "U", "M"], ["I", "S", "O", "K", "O", "E", "W", "E", "K", "N", "R", "C", "A", "N", "M", "P", "E", "A", "A", "O"], ["L", "G", "I", "R", "R", "A", "I", "T", "E", "P", "B", "L", "J", "X", "Q", "E", "M", "S", "T", "V"], ["X", "R", "U", "P", "E", "L", "A", "I", "C", "I", "F", "I", "T", "R", "A", "Y", "N", "L", "T", "I"], ["E", "E", "P", "L", "C", "B", "Z", "X", "T", "O", "B", "O", "R", "X", "X", "H", "Q", "T", "P", "V"], ["N", "O", "I", "A", "Q", "S", "M", "C", "P", "P", "T", "I", "E", "B", "F", "H", "R", "Z", "O", "K"]], "words": {"TOKEN": [[11, 17], [12, 16], [13, 15], [14, 14], [15, 13]], "ARTIFICIALE": [[17, 14], [17, 13], [17, 12], [17, 11], [17, 10], [17, 9], [17, 8], [17, 7], [17, 6], [17, 5], [17, 4]], "ADDESTRAMENTO": [[4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10], [4, 11], [4, 12], [4, 13], [4, 14]], "RICONOSCIMENTO": [[6, 5], [7, 6], [8, 7], [9, 8], [10, 9], [11, 10], [12, 11], [13, 12], [14, 13], [15, 14], [16, 15], [17, 16], [18, 17], [19, 18]], "DATI": [[14, 16], [15, 17], [16, 18], [17, 19]], "DEEP": [[10, 5], [11, 4], [12, 3], [13, 2]], "RANDOMFOREST": [[6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14], [14, 15], [15, 16], [16, 17], [17, 18]], "CLASSIFICAZIONE": [[0, 15], [0, 14], [0, 13], [0, 12], [0, 11], [0, 10], [0, 9], [0, 8], [0, 7], [0, 6], [0, 5], [0, 4], [0, 3], [0, 2], [0, 1]], "GENERATIVO": [[5, 8], [6, 9], [7, 10], [8, 11], [9, 12], [10, 13], [11, 14], [12, 15], [13, 16], [14, 17]], "MACHINELEARNING": [[2, 18], [2, 17], [2, 16], [2, 15], [2, 14], [2, 13], [2, 12], [2, 11], [2, 10], [2, 9], [2, 8], [2, 7], [2, 6], [2, 5], [2, 4]], "PREDIZIONE": [[17, 3], [16, 4], [15, 5], [14, 6], [13, 7], [12, 8], [11, 9], [10, 10], [9, 11], [8, 12]], "INTELLIGENZA": [[4, 1], [5, 2], [6, 3], [7, 4], [8, 5], [9, 6], [10, 7], [11, 8], [12, 9], [13, 10], [14, 11], [15, 12]], "RETE": [[13, 5], [12, 6], [11, 7], [10, 8]], "ALGORITMO": [[7, 19], [8, 19], [9, 19], [10, 19], [11, 19], [12, 19], [13, 19], [14, 19], [15, 19]], "AUTOMAZIONE": [[15, 18], [14, 18], [13, 18], [12, 18], [11, 18], [10, 18], [9, 18], [8, 18], [7, 18], [6, 18], [5, 18]], "LINGUAGGIO": [[16, 0], [15, 0], [14, 0], [13, 0], [12, 0], [11, 0], [10, 0], [9, 0], [8, 0], [7, 0]], "VISIONE": [[10, 14], [11, 13], [12, 12], [13, 11], [14, 10], [15, 9], [16, 8]], "MODELLO": [[5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1]], "ROBOT": [[18, 12], [18, 11], [18, 10], [18, 9], [18, 8]], "NEURONI": [[19, 0], [18, 1], [17, 2], [16, 3], [15, 4], [14, 5], [13, 6]]}}, {"grid": [["A", "Y", "O", "F", "H", "N", "R", "Q", "J", "L", "T", "B", "U", "Z", "V", "A", "T", "W", "W", "C"], ["R", "K", "T", "P", "R", "E", "D", "I", "Z", "I", "O", "N", "E", "I", "D", "K", "Y", "H", "L", "B"], ["T", "W", "N", "L", "S", "H", "Z", "G", "A", "H", "N", "A", "E", "D", "E", "X", "X", "E", "J", "G"], ["I", "E", "E", "C", "J", "X", "J", "O", "J", "B", "L", "T", "E", "T", "B", "H", "A", "O", "N", "C"], ["F", "F", "M", "C", "W", "R", "T", "U", "V", "G", "L", "S", "Z", "P", "E", "Z", "C", "B", "O", "M"], ["I", "V", "I", "S", "I", "O", "N", "E", "O", "I", "T", "X", "Z", "T", "A", "R", "E", "Z", "A", "J"], ["C", "M", "C", "N", "G", "U", "E", "R", "V", "R", "T", "L", "S", "Z", "T", "A", "N", "C", "P", "J"], ["I", "N", "S", "E", "B", "V", "I", "V", "A", "M", "I", "A", "N", "G", "C", "T", "H", "W", "C", "S"], ["A", "E", "O", "U", "M", "T", "Z", "M", "X", "N", "M", "E", "R", "F", "S", "I", "P", "P", "B", "U"], ["L", "U", "N", "E", "M", "R", "E", "S", "G", "B", "G", "U", "A", "E", "N", "S", "N", "P", "Y", "X"], ["E", "R", "O", "O", "D", "N", "J", "U", "M", "I", "F", "U", "R", "E", "N", "X", "U", "J", "O", "J"], ["J", "O", "C", "O", "T", "V", "A", "V", "L", "Y", "T", "O", "L", "Z", "S", "E", "N", "C", "S", "K"], ["K", "N", "I", "O", "J", "G", "R", "L", "X", "O", "F", "E", "D", "N", "Y", "F", "G", "L", "C", "Q"], ["H", "I", "R", "L", "G", "P", "E", "A", "M", "M", "A", "Z", "O", "E", "X", "C", "I", "G", "O", "Z"], ["G", "D", "Q", "I", "I", "T", "H", "A", "O", "R", "E", "Y", "C", "K", "X", "G", "F", "H", "L", "H"], ["C", "A", "O", "F", "N", "E", "Z", "D", "N", "U", "P", "J", "U", "O", "H", "W", "H", "L", "L", "Z"], ["Z", "T", "M", "I", "P", "I", "N", "I", "W", "X", "R", "I", "S", "T", "W", "T", "Z", "N", "E", "H"], ["O", "I", "R", "A", "O", "A", "N", "W", "F", "T", "I", "S", "U", "F", "H", "Q", "K", "C", "D", "M"], ["K", "N", "H", "N", "R", "G", "D", "E", "E", "P", "T", "R", "O", "B", "O", "T", "H", "L", "O", "H"], ["T", "J", "E", "E", "N", "O", "I", "Z", "A", "C", "I", "F", "I", "S", "S", "A", "L", "C", "M", "S"]], "words": {"RANDOMFOREST": [[18, 4], [17, 5], [16, 6], [15, 7], [14, 8], [13, 9], [12, 10], [11, 11], [10, 12], [9, 13], [8, 14], [7, 15]], "RICONOSCIMENTO": [[13, 2], [12, 2], [11, 2], [10, 2], [9, 2], [8, 2], [7, 2], [6, 2], [5, 2], [4, 2], [3, 2], [2, 2], [1, 2], [0, 2]], "AUTOMAZIONE": [[9, 12], [10, 11], [11, 10], [12, 9], [13, 8], [14, 7], [15, 6], [16, 5], [17, 4], [18, 3], [19, 2]], "ALGORITMO": [[2, 11], [3, 10], [4, 9], [5, 8], [6, 7], [7, 6], [8, 5], [9, 4], [10, 3]], "ADDESTRAMENTO": [[0, 15], [1, 14], [2, 13], [3, 12], [4, 11], [5, 10], [6, 9], [7, 8], [8, 7], [9, 6], [10, 5], [11, 4], [12, 3]], "INTELLIGENZA": [[16, 3], [15, 4], [14, 5], [13, 6], [12, 7], [11, 8], [10, 9], [9, 10], [8, 11], [7, 12], [6, 13], [5, 14]], "CLASSIFICAZIONE": [[19, 17], [19, 16], [19, 15], [19, 14], [19, 13], [19, 12], [19, 11], [19, 10], [19, 9], [19, 8], [19, 7], [19, 6], [19, 5], [19, 4], [19, 3]], "DATI": [[14, 1], [15, 1], [16, 1], [17, 1]], "PREDIZIONE": [[1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [1, 11], [1, 12]], "MODELLO": [[19, 18], [18, 18], [17, 18], [16, 18], [15, 18], [14, 18], [13, 18]], "GENERATIVO": [[12, 16], [11, 15], [10, 14], [9, 13], [8, 12], [7, 11], [6, 10], [5, 9], [4, 8], [3, 7]], "TOKEN": [[16, 13], [15, 13], [14, 13], [13, 13], [12, 13]], "MACHINELEARNING": [[4, 19], [5, 18], [6, 17], [7, 16], [8, 15], [9, 14], [10, 13], [11, 12], [12, 11], [13, 10], [14, 9], [15, 8], [16, 7], [17, 6], [18, 5]], "DEEP": [[18, 6], [18, 7], [18, 8], [18, 9]], "RETE": [[5, 15], [4, 14], [3, 13], [2, 12]], "LINGUAGGIO": [[6, 11], [7, 10], [8, 9], [9, 8], [10, 7], [11, 6], [12, 5], [13, 4], [14, 3], [15, 2]], "VISIONE": [[5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7]], "ROBOT": [[18, 11], [18, 12], [18, 13], [18, 14], [18, 15]], "NEURONI": [[7, 1], [8, 1], [9, 1], [10, 1], [11, 1], [12, 1], [13, 1]], "ARTIFICIALE": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0]]}}];
         let currentPuzzleIndex = 0;
-        
-        // Current game state
         let wordData = {};
         let gridData = [];
-        
         let isSelecting = false;
         let selectedCells = [];
         let foundWords = new Set();
         let selectionDirection = null;
         let startCell = null;
-        
+
         const grid = document.getElementById('grid');
         let cells = grid.querySelectorAll('.cell');
         let wordItems = document.querySelectorAll('.word-item');
         let cellsArray = Array.from(cells);
-        
-        // Initialize with first puzzle
+
         loadPuzzle(0);
-        
-        // Add event listeners
+
         grid.addEventListener('mousedown', startSelection);
         grid.addEventListener('mouseover', continueSelection);
         document.addEventListener('mouseup', endSelection);
-        
-        // Touch support
         grid.addEventListener('touchstart', handleTouchStart, { passive: false });
         grid.addEventListener('touchmove', handleTouchMove, { passive: false });
         grid.addEventListener('touchend', endSelection);
-        
+
         function loadPuzzle(index) {
             const puzzle = allPuzzles[index % allPuzzles.length];
             gridData = puzzle.grid;
             wordData = puzzle.words;
-            
-            // Update grid display
             cellsArray.forEach((cell, i) => {
-                const row = Math.floor(i / 25);
-                const col = i % 25;
+                const row = Math.floor(i / 20);
+                const col = i % 20;
                 cell.textContent = gridData[row][col];
                 cell.className = 'cell';
             });
-            
-            // Reset game state
             foundWords.clear();
             selectedCells = [];
-            
-            // Reset word items
-            wordItems.forEach(item => {
-                item.classList.remove('found');
-            });
-            
-            // Update progress
+            wordItems.forEach(item => item.classList.remove('found'));
             updateProgress();
         }
-        
+
         function startSelection(e) {
             if (e.target.classList.contains('cell')) {
                 isSelecting = true;
@@ -1092,114 +735,86 @@
                 selectCell(e.target);
             }
         }
-        
+
         function continueSelection(e) {
-            if (isSelecting && e.target.classList.contains('cell')) {
-                selectCell(e.target);
-            }
+            if (isSelecting && e.target.classList.contains('cell')) selectCell(e.target);
         }
-        
+
         function getDirection(fromCell, toCell) {
             const fromRow = parseInt(fromCell.dataset.row);
             const fromCol = parseInt(fromCell.dataset.col);
             const toRow = parseInt(toCell.dataset.row);
             const toCol = parseInt(toCell.dataset.col);
-            
             const rowDiff = toRow - fromRow;
             const colDiff = toCol - fromCol;
-            
             const rowDir = rowDiff === 0 ? 0 : (rowDiff > 0 ? 1 : -1);
             const colDir = colDiff === 0 ? 0 : (colDiff > 0 ? 1 : -1);
-            
             return { rowDir, colDir };
         }
-        
+
         function isInLine(fromCell, toCell, direction) {
             const fromRow = parseInt(fromCell.dataset.row);
             const fromCol = parseInt(fromCell.dataset.col);
             const toRow = parseInt(toCell.dataset.row);
             const toCol = parseInt(toCell.dataset.col);
-            
             const rowDiff = toRow - fromRow;
             const colDiff = toCol - fromCol;
-            
             if (direction.rowDir === 0 && direction.colDir === 0) return true;
-            
-            if (direction.rowDir === 0) {
-                return rowDiff === 0 && Math.sign(colDiff) === direction.colDir;
-            } else if (direction.colDir === 0) {
-                return colDiff === 0 && Math.sign(rowDiff) === direction.rowDir;
-            } else {
-                return Math.abs(rowDiff) === Math.abs(colDiff) && 
-                       Math.sign(rowDiff) === direction.rowDir && 
-                       Math.sign(colDiff) === direction.colDir;
-            }
+            if (direction.rowDir === 0) return rowDiff === 0 && Math.sign(colDiff) === direction.colDir;
+            else if (direction.colDir === 0) return colDiff === 0 && Math.sign(rowDiff) === direction.rowDir;
+            else return Math.abs(rowDiff) === Math.abs(colDiff) && Math.sign(rowDiff) === direction.rowDir && Math.sign(colDiff) === direction.colDir;
         }
-        
+
         function selectCell(cell) {
             if (selectedCells.includes(cell)) return;
-            
             if (selectedCells.length === 0) {
                 selectedCells.push(cell);
                 cell.classList.add('selecting');
                 return;
             }
-            
             if (selectedCells.length === 1) {
                 const dir = getDirection(selectedCells[0], cell);
-                if (Math.abs(dir.rowDir) <= 1 && Math.abs(dir.colDir) <= 1 && 
-                    (dir.rowDir !== 0 || dir.colDir !== 0)) {
+                if (Math.abs(dir.rowDir) <= 1 && Math.abs(dir.colDir) <= 1 && (dir.rowDir !== 0 || dir.colDir !== 0)) {
                     selectionDirection = dir;
                     selectedCells.push(cell);
                     cell.classList.add('selecting');
                 }
                 return;
             }
-            
             if (selectionDirection && isInLine(startCell, cell, selectionDirection)) {
                 const lastCell = selectedCells[selectedCells.length - 1];
                 const cellsBetween = getCellsBetween(lastCell, cell, selectionDirection);
-                
                 cellsBetween.forEach(c => {
                     if (!selectedCells.includes(c)) {
                         selectedCells.push(c);
                         c.classList.add('selecting');
                     }
                 });
-                
                 if (!selectedCells.includes(cell)) {
                     selectedCells.push(cell);
                     cell.classList.add('selecting');
                 }
             }
         }
-        
+
         function getCellsBetween(fromCell, toCell, direction) {
             const cells = [];
             const fromRow = parseInt(fromCell.dataset.row);
             const fromCol = parseInt(fromCell.dataset.col);
             const toRow = parseInt(toCell.dataset.row);
             const toCol = parseInt(toCell.dataset.col);
-            
             let currentRow = fromRow + direction.rowDir;
             let currentCol = fromCol + direction.colDir;
-            
             while (currentRow !== toRow || currentCol !== toCol) {
-                const cell = cellsArray.find(c => 
-                    parseInt(c.dataset.row) === currentRow && 
-                    parseInt(c.dataset.col) === currentCol
-                );
+                const cell = cellsArray.find(c => parseInt(c.dataset.row) === currentRow && parseInt(c.dataset.col) === currentCol);
                 if (cell) cells.push(cell);
-                
                 currentRow += direction.rowDir;
                 currentCol += direction.colDir;
-                
                 if (Math.abs(currentRow - fromRow) > 20 || Math.abs(currentCol - fromCol) > 20) break;
             }
-            
             return cells;
         }
-        
+
         function endSelection() {
             if (isSelecting) {
                 isSelecting = false;
@@ -1207,24 +822,18 @@
                 clearSelection();
             }
         }
-        
-        function clearSelection() {
-            cellsArray.forEach(cell => cell.classList.remove('selecting'));
-        }
-        
+
+        function clearSelection() { cellsArray.forEach(cell => cell.classList.remove('selecting')); }
+
         function checkWord() {
             if (selectedCells.length === 0) return;
-            
             const selectedWord = selectedCells.map(cell => cell.textContent).join('');
-            
             for (const [word, positions] of Object.entries(wordData)) {
                 if (foundWords.has(word)) continue;
-                
                 if (selectedWord === word && matchesPositions(selectedCells, positions)) {
                     markWordFound(word, selectedCells);
                     return;
                 }
-                
                 const reversedWord = selectedWord.split('').reverse().join('');
                 if (reversedWord === word && matchesPositions(selectedCells.slice().reverse(), positions)) {
                     markWordFound(word, selectedCells);
@@ -1232,57 +841,42 @@
                 }
             }
         }
-        
+
         function matchesPositions(cells, positions) {
             if (cells.length !== positions.length) return false;
-            
             return cells.every((cell, i) => {
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
                 return row === positions[i][0] && col === positions[i][1];
             });
         }
-        
+
         function markWordFound(word, cells) {
             foundWords.add(word);
-            
             cells.forEach(cell => {
                 cell.classList.remove('selecting');
                 cell.classList.add('found');
             });
-            
             const wordItem = document.querySelector(`.word-item[data-word="${word}"]`);
-            if (wordItem) {
-                wordItem.classList.add('found');
-            }
-            
+            if (wordItem) wordItem.classList.add('found');
             updateProgress();
-            
-            if (foundWords.size === Object.keys(wordData).length) {
-                setTimeout(showVictory, 500);
-            }
+            if (foundWords.size === Object.keys(wordData).length) setTimeout(showVictory, 500);
         }
-        
-        function updateProgress() {
-            document.getElementById('found').textContent = foundWords.size;
-        }
-        
+
+        function updateProgress() { document.getElementById('found').textContent = foundWords.size; }
+
         function showVictory() {
             document.getElementById('overlay').classList.add('show');
             document.getElementById('victory').classList.add('show');
         }
-        
+
         function resetGame() {
-            // Load next puzzle
             currentPuzzleIndex++;
             loadPuzzle(currentPuzzleIndex);
-            
-            // Hide victory message
             document.getElementById('overlay').classList.remove('show');
             document.getElementById('victory').classList.remove('show');
         }
-        
-        // Touch support functions
+
         function handleTouchStart(e) {
             e.preventDefault();
             const touch = e.touches[0];
@@ -1296,19 +890,16 @@
                 selectCell(element);
             }
         }
-        
+
         function handleTouchMove(e) {
             e.preventDefault();
             if (isSelecting) {
                 const touch = e.touches[0];
                 const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (element && element.classList.contains('cell')) {
-                    selectCell(element);
-                }
+                if (element && element.classList.contains('cell')) selectCell(element);
             }
         }
-        
-        // Initialize progress display
+
         document.getElementById('total').textContent = Object.keys(wordData).length;
     </script>
 </body>
