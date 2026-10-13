@@ -91,6 +91,20 @@
 
         .field .hint { font-weight: normal; color: #888; font-size: 0.9em; }
 
+        .field-stack { display: grid; gap: 16px; }
+
+        select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            font: inherit;
+            font-size: 0.95em;
+        }
+
+        select:focus { outline: none; border-color: #764ba2; }
+
         .size-row { display: flex; align-items: center; gap: 12px; }
         .size-row input[type=range] { flex: 1; accent-color: #764ba2; }
         .size-value {
@@ -324,16 +338,28 @@
 <body>
     <div class="container">
         <h1>🔍 Word Search Puzzle</h1>
-        <div class="subtitle">Click and drag to select words! Pick your own words and grid size below.</div>
+        <div class="subtitle">Click and drag to select words! Pick your own words, grid size and language below.</div>
 
         <details class="settings" open>
             <summary>⚙️ Customize puzzle</summary>
             <form class="settings-body" id="settingsForm">
-                <div class="field">
-                    <label for="sizeInput">Grid size</label>
-                    <div class="size-row">
-                        <input type="range" id="sizeInput" min="5" max="30" value="20">
-                        <span class="size-value" id="sizeValue">20×20</span>
+                <div class="field-stack">
+                    <div class="field">
+                        <label for="sizeInput">Grid size</label>
+                        <div class="size-row">
+                            <input type="range" id="sizeInput" min="5" max="30" value="20">
+                            <span class="size-value" id="sizeValue">20×20</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="langInput">Word language</label>
+                        <select id="langInput">
+                            <option value="it">🇮🇹 Italiano</option>
+                            <option value="en">🇬🇧 English</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="de">🇩🇪 Deutsch</option>
+                        </select>
                     </div>
                 </div>
                 <div class="field">
@@ -386,14 +412,47 @@
             'ADDESTRAMENTO', 'INTELLIGENZA', 'ARTIFICIALE', 'AUTOMAZIONE', 'PREDIZIONE', 'LINGUAGGIO',
             'VISIONE', 'ROBOT', 'CLASSIFICAZIONE', 'DEEP', 'RICONOSCIMENTO', 'TOKEN', 'GENERATIVO', 'RANDOMFOREST'];
 
-        // Word bank used to pick a list that suits the chosen grid size
-        const WORD_BANK = ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATI', 'RETE', 'DEEP', 'BIAS', 'NODO', 'PESO',
-            'TOKEN', 'ROBOT', 'PIXEL', 'CLOUD', 'CODICE', 'STRATO', 'LOGICA', 'AGENTE', 'PROMPT', 'SEGNALE',
-            'VETTORE', 'TENSORE', 'MODELLO', 'NEURONI', 'DATASET', 'CHATBOT', 'MEMORIA', 'SENSORE', 'CALCOLO',
-            'VISIONE', 'ROBOTICA', 'FUNZIONE', 'ALGORITMO', 'GRADIENTE', 'EMBEDDING', 'INFERENZA', 'PARAMETRI',
-            'ATTENZIONE', 'LINGUAGGIO', 'PREDIZIONE', 'GENERATIVO', 'AUTOMAZIONE', 'ARTIFICIALE', 'RETINEURALI',
-            'INTELLIGENZA', 'RANDOMFOREST', 'DEEPLEARNING', 'ADDESTRAMENTO', 'APPRENDIMENTO', 'TRASFORMATORE',
-            'RICONOSCIMENTO', 'OTTIMIZZAZIONE', 'CLASSIFICAZIONE', 'MACHINELEARNING', 'BACKPROPAGATION'];
+        // Word banks used to pick a list that suits the chosen grid size.
+        // Words are written without accents (German umlauts as AE/OE/UE) so they
+        // blend in with the A–Z filler letters.
+        const DEFAULT_LANG = 'it';
+        const WORD_BANKS = {
+            it: ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATI', 'RETE', 'DEEP', 'BIAS', 'NODO', 'PESO',
+                'TOKEN', 'ROBOT', 'PIXEL', 'CLOUD', 'CODICE', 'STRATO', 'LOGICA', 'AGENTE', 'PROMPT', 'SEGNALE',
+                'VETTORE', 'TENSORE', 'MODELLO', 'NEURONI', 'DATASET', 'CHATBOT', 'MEMORIA', 'SENSORE', 'CALCOLO',
+                'VISIONE', 'ROBOTICA', 'FUNZIONE', 'ALGORITMO', 'GRADIENTE', 'EMBEDDING', 'INFERENZA', 'PARAMETRI',
+                'ATTENZIONE', 'LINGUAGGIO', 'PREDIZIONE', 'GENERATIVO', 'AUTOMAZIONE', 'ARTIFICIALE', 'RETINEURALI',
+                'INTELLIGENZA', 'RANDOMFOREST', 'DEEPLEARNING', 'ADDESTRAMENTO', 'APPRENDIMENTO', 'TRASFORMATORE',
+                'RICONOSCIMENTO', 'OTTIMIZZAZIONE', 'CLASSIFICAZIONE', 'MACHINELEARNING', 'BACKPROPAGATION'],
+            en: ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATA', 'NODE', 'BIAS', 'LOSS', 'CODE', 'TOKEN',
+                'ROBOT', 'PIXEL', 'CLOUD', 'LAYER', 'MODEL', 'AGENT', 'LOGIC', 'PROMPT', 'NEURON', 'SIGNAL',
+                'VECTOR', 'TENSOR', 'MEMORY', 'SENSOR', 'WEIGHT', 'VISION', 'DATASET', 'CHATBOT', 'NETWORK',
+                'ROBOTICS', 'FUNCTION', 'TRAINING', 'LANGUAGE', 'ALGORITHM', 'GRADIENT', 'EMBEDDING', 'INFERENCE',
+                'PARAMETER', 'ATTENTION', 'PREDICTION', 'GENERATIVE', 'AUTOMATION', 'ARTIFICIAL', 'TRANSFORMER',
+                'RECOGNITION', 'INTELLIGENCE', 'RANDOMFOREST', 'DEEPLEARNING', 'OPTIMIZATION', 'NEURALNETWORK',
+                'REINFORCEMENT', 'COMPUTERVISION', 'CLASSIFICATION', 'MACHINELEARNING', 'BACKPROPAGATION'],
+            es: ['BIT', 'GPU', 'RED', 'BYTE', 'CHIP', 'NODO', 'PESO', 'NUBE', 'CAPA', 'DATOS',
+                'SESGO', 'TOKEN', 'ROBOT', 'PIXEL', 'CODIGO', 'LOGICA', 'AGENTE', 'MODELO', 'PROMPT', 'VECTOR',
+                'TENSOR', 'SENSOR', 'VISION', 'NEURONA', 'MEMORIA', 'CALCULO', 'DATASET', 'CHATBOT', 'ROBOTICA',
+                'FUNCION', 'LENGUAJE', 'ATENCION', 'ALGORITMO', 'GRADIENTE', 'EMBEDDING', 'INFERENCIA', 'PARAMETROS',
+                'GENERATIVO', 'ARTIFICIAL', 'PREDICCION', 'APRENDIZAJE', 'INTELIGENCIA', 'OPTIMIZACION',
+                'TRANSFORMADOR', 'ENTRENAMIENTO', 'CLASIFICACION', 'AUTOMATIZACION', 'RECONOCIMIENTO',
+                'BOSQUEALEATORIO', 'REDESNEURONALES'],
+            fr: ['BIT', 'GPU', 'CODE', 'PUCE', 'OCTET', 'NOEUD', 'POIDS', 'BIAIS', 'TOKEN', 'ROBOT',
+                'PIXEL', 'NUAGE', 'AGENT', 'COUCHE', 'MODELE', 'PROMPT', 'SIGNAL', 'CALCUL', 'VISION', 'LOGIQUE',
+                'NEURONE', 'VECTEUR', 'TENSEUR', 'MEMOIRE', 'CAPTEUR', 'DONNEES', 'RESEAU', 'CHATBOT', 'LANGAGE',
+                'FONCTION', 'GRADIENT', 'ROBOTIQUE', 'INFERENCE', 'PARAMETRE', 'ATTENTION', 'GENERATIF',
+                'ALGORITHME', 'PLONGEMENT', 'PREDICTION', 'TRANSFORMEUR', 'ARTIFICIELLE', 'INTELLIGENCE',
+                'ENTRAINEMENT', 'OPTIMISATION', 'APPRENTISSAGE', 'JEUDEDONNEES', 'FORETALEATOIRE', 'RESEAUNEURONAL',
+                'RECONNAISSANCE', 'AUTOMATISATION', 'CLASSIFICATION'],
+            de: ['BIT', 'GPU', 'BYTE', 'CHIP', 'NETZ', 'BIAS', 'CODE', 'DATEN', 'TOKEN', 'PIXEL',
+                'CLOUD', 'LOGIK', 'AGENT', 'KNOTEN', 'MODELL', 'PROMPT', 'NEURON', 'SIGNAL', 'VEKTOR', 'TENSOR',
+                'SENSOR', 'LERNEN', 'ROBOTER', 'GEWICHT', 'SCHICHT', 'CHATBOT', 'ROBOTIK', 'SPRACHE', 'SPEICHER',
+                'FUNKTION', 'GRADIENT', 'INFERENZ', 'TRAINING', 'DATENSATZ', 'PARAMETER', 'EMBEDDING', 'GENERATIV',
+                'ERKENNUNG', 'KUENSTLICH', 'VORHERSAGE', 'TRANSFORMER', 'ALGORITHMUS', 'INTELLIGENZ', 'OPTIMIERUNG',
+                'ZUFALLSWALD', 'DEEPLEARNING', 'KLASSIFIKATION', 'AUFMERKSAMKEIT', 'NEURONALESNETZ',
+                'AUTOMATISIERUNG', 'MASCHINELLESLERNEN']
+        };
 
         function wordCountFor(size) {
             if (size <= 6) return 4;
@@ -401,17 +460,17 @@
             return Math.min(MAX_WORDS, Math.round(size * 0.8));
         }
 
-        function pickWords(size, count) {
+        function pickWords(size, count, lang) {
             const minLength = size >= 15 ? 4 : 3;
-            const eligible = WORD_BANK.filter(w => w.length <= size && w.length >= minLength);
+            const eligible = WORD_BANKS[lang].filter(w => w.length <= size && w.length >= minLength);
             return shuffle([...eligible]).slice(0, count);
         }
 
         // Pick words for the size, trying a fresh (and eventually smaller) sample if they don't fit
-        function generateRandomPuzzle(size) {
+        function generateRandomPuzzle(size, lang) {
             const target = wordCountFor(size);
             for (let attempt = 0; attempt < 9; attempt++) {
-                const words = pickWords(size, Math.max(1, target - Math.floor(attempt / 3)));
+                const words = pickWords(size, Math.max(1, target - Math.floor(attempt / 3)), lang);
                 const puzzle = generatePuzzle(size, words, 300, 600);
                 if (puzzle) return { words, puzzle };
             }
@@ -572,10 +631,11 @@
         const sizeInput = document.getElementById('sizeInput');
         const sizeValue = document.getElementById('sizeValue');
         const wordsInput = document.getElementById('wordsInput');
+        const langInput = document.getElementById('langInput');
         const settingsError = document.getElementById('settingsError');
         const generateBtn = document.getElementById('generateBtn');
 
-        let currentSettings = { size: 20, words: DEFAULT_WORDS };
+        let currentSettings = { size: 20, words: DEFAULT_WORDS, lang: DEFAULT_LANG };
         let wordData = {};
         let cellsArray = [];
         let isSelecting = false;
@@ -654,15 +714,15 @@
                 if (!puzzle)
                     return `Couldn't fit all ${settings.words.length} words in a ${settings.size}×${settings.size} grid. ` +
                            'Try a bigger grid or fewer words.';
-                return { settings, puzzle };
+                return { settings: { ...settings, lang: settings.lang || langInput.value }, puzzle };
             });
         }
 
-        function generateRandom(size) {
+        function generateRandom(size, lang) {
             runGenerator(() => {
-                const result = generateRandomPuzzle(size);
+                const result = generateRandomPuzzle(size, lang);
                 if (!result) return `Couldn't build a ${size}×${size} puzzle. Please try again.`;
-                return { settings: { size, words: result.words }, puzzle: result.puzzle };
+                return { settings: { size, lang, words: result.words }, puzzle: result.puzzle };
             });
         }
 
@@ -673,8 +733,8 @@
         }
 
         // Settings are kept in the URL so a custom puzzle can be shared
-        function saveToUrl({ size, words }) {
-            const params = new URLSearchParams({ size, words: words.join(',') });
+        function saveToUrl({ size, lang, words }) {
+            const params = new URLSearchParams({ size, lang, words: words.join(',') });
             history.replaceState(null, '', '?' + params.toString());
         }
 
@@ -682,14 +742,17 @@
             const params = new URLSearchParams(location.search);
             const size = parseInt(params.get('size'), 10);
             const words = params.has('words') ? parseWords(params.get('words')) : [];
+            const lang = params.get('lang');
             return {
                 size: size >= MIN_SIZE && size <= MAX_SIZE ? size : 20,
-                words: words.length ? words : DEFAULT_WORDS
+                lang: WORD_BANKS.hasOwnProperty(lang) ? lang : DEFAULT_LANG,
+                words
             };
         }
 
-        function syncForm({ size, words }) {
+        function syncForm({ size, lang, words }) {
             sizeInput.value = size;
+            langInput.value = lang;
             sizeValue.textContent = `${size}×${size}`;
             wordsInput.value = words.join(', ');
         }
@@ -698,13 +761,15 @@
             sizeValue.textContent = `${sizeInput.value}×${sizeInput.value}`;
         });
 
-        // Changing the size picks a new word list that fits the grid
-        sizeInput.addEventListener('change', () => generateRandom(parseInt(sizeInput.value, 10)));
-        document.getElementById('randomBtn').addEventListener('click', () => generateRandom(parseInt(sizeInput.value, 10)));
+        // Changing the size or language picks a new word list that fits the grid
+        const generateRandomFromForm = () => generateRandom(parseInt(sizeInput.value, 10), langInput.value);
+        sizeInput.addEventListener('change', generateRandomFromForm);
+        langInput.addEventListener('change', generateRandomFromForm);
+        document.getElementById('randomBtn').addEventListener('click', generateRandomFromForm);
 
         document.getElementById('settingsForm').addEventListener('submit', e => {
             e.preventDefault();
-            generate({ size: parseInt(sizeInput.value, 10), words: parseWords(wordsInput.value) });
+            generate({ size: parseInt(sizeInput.value, 10), lang: langInput.value, words: parseWords(wordsInput.value) });
         });
 
         wordsInput.addEventListener('keydown', e => {
@@ -871,9 +936,13 @@
 
         // ---------- Start ----------
 
+        // Shared links keep their words; otherwise the Italian default list is shown,
+        // or a random list when another language was requested
         const initial = loadFromUrl();
-        syncForm(initial);
-        generate(initial);
+        syncForm({ ...initial, words: initial.words.length ? initial.words : DEFAULT_WORDS });
+        if (initial.words.length) generate(initial);
+        else if (initial.lang === DEFAULT_LANG) generate({ ...initial, words: DEFAULT_WORDS });
+        else generateRandom(initial.size, initial.lang);
     </script>
 </body>
 </html>
