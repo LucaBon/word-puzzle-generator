@@ -118,6 +118,16 @@
 
         textarea:focus { outline: none; border-color: #764ba2; }
 
+        .link-btn {
+            background: none;
+            box-shadow: none;
+            color: #764ba2;
+            padding: 6px 0 0;
+            font-size: 0.95em;
+        }
+
+        .link-btn:hover { transform: none; box-shadow: none; text-decoration: underline; }
+
         .settings-error {
             grid-column: 1 / -1;
             color: #c62828;
@@ -329,6 +339,7 @@
                 <div class="field">
                     <label for="wordsInput">Words <span class="hint">(comma, space or one per line — up to 40)</span></label>
                     <textarea id="wordsInput" spellcheck="false"></textarea>
+                    <button type="button" class="link-btn" id="randomBtn">🔀 Random words for this size</button>
                 </div>
                 <button type="submit" id="generateBtn">✨ Generate</button>
                 <div class="settings-error" id="settingsError" role="alert"></div>
@@ -374,6 +385,38 @@
         const DEFAULT_WORDS = ['ALGORITMO', 'RETE', 'NEURONI', 'MACHINELEARNING', 'MODELLO', 'DATI',
             'ADDESTRAMENTO', 'INTELLIGENZA', 'ARTIFICIALE', 'AUTOMAZIONE', 'PREDIZIONE', 'LINGUAGGIO',
             'VISIONE', 'ROBOT', 'CLASSIFICAZIONE', 'DEEP', 'RICONOSCIMENTO', 'TOKEN', 'GENERATIVO', 'RANDOMFOREST'];
+
+        // Word bank used to pick a list that suits the chosen grid size
+        const WORD_BANK = ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATI', 'RETE', 'DEEP', 'BIAS', 'NODO', 'PESO',
+            'TOKEN', 'ROBOT', 'PIXEL', 'CLOUD', 'CODICE', 'STRATO', 'LOGICA', 'AGENTE', 'PROMPT', 'SEGNALE',
+            'VETTORE', 'TENSORE', 'MODELLO', 'NEURONI', 'DATASET', 'CHATBOT', 'MEMORIA', 'SENSORE', 'CALCOLO',
+            'VISIONE', 'ROBOTICA', 'FUNZIONE', 'ALGORITMO', 'GRADIENTE', 'EMBEDDING', 'INFERENZA', 'PARAMETRI',
+            'ATTENZIONE', 'LINGUAGGIO', 'PREDIZIONE', 'GENERATIVO', 'AUTOMAZIONE', 'ARTIFICIALE', 'RETINEURALI',
+            'INTELLIGENZA', 'RANDOMFOREST', 'DEEPLEARNING', 'ADDESTRAMENTO', 'APPRENDIMENTO', 'TRASFORMATORE',
+            'RICONOSCIMENTO', 'OTTIMIZZAZIONE', 'CLASSIFICAZIONE', 'MACHINELEARNING', 'BACKPROPAGATION'];
+
+        function wordCountFor(size) {
+            if (size <= 6) return 4;
+            if (size <= 8) return 6;
+            return Math.min(MAX_WORDS, Math.round(size * 0.8));
+        }
+
+        function pickWords(size, count) {
+            const minLength = size >= 15 ? 4 : 3;
+            const eligible = WORD_BANK.filter(w => w.length <= size && w.length >= minLength);
+            return shuffle([...eligible]).slice(0, count);
+        }
+
+        // Pick words for the size, trying a fresh (and eventually smaller) sample if they don't fit
+        function generateRandomPuzzle(size) {
+            const target = wordCountFor(size);
+            for (let attempt = 0; attempt < 9; attempt++) {
+                const words = pickWords(size, Math.max(1, target - Math.floor(attempt / 3)));
+                const puzzle = generatePuzzle(size, words, 300, 600);
+                if (puzzle) return { words, puzzle };
+            }
+            return null;
+        }
 
         const HORIZONTAL = [[0, 1], [0, -1]];
         const VERTICAL = [[1, 0], [-1, 0]];
@@ -586,26 +629,41 @@
             settingsError.classList.toggle('show', !!message);
         }
 
-        function generate(settings) {
-            const error = validate(settings.size, settings.words);
-            if (error) { showError(error); return; }
+        function runGenerator(task) {
             showError('');
             generateBtn.disabled = true;
             generateBtn.textContent = '⏳ Generating…';
             // Let the browser paint the button state before the synchronous search
             setTimeout(() => {
-                const puzzle = generatePuzzle(settings.size, settings.words);
+                const result = task();
                 generateBtn.disabled = false;
                 generateBtn.textContent = '✨ Generate';
-                if (!puzzle) {
-                    showError(`Couldn't fit all ${settings.words.length} words in a ${settings.size}×${settings.size} grid. ` +
-                              'Try a bigger grid or fewer words.');
-                    return;
-                }
-                currentSettings = settings;
-                render(puzzle);
-                saveToUrl(settings);
+                if (typeof result === 'string') { showError(result); return; }
+                currentSettings = result.settings;
+                syncForm(result.settings);
+                render(result.puzzle);
+                saveToUrl(result.settings);
             }, 20);
+        }
+
+        function generate(settings) {
+            const error = validate(settings.size, settings.words);
+            if (error) { showError(error); return; }
+            runGenerator(() => {
+                const puzzle = generatePuzzle(settings.size, settings.words);
+                if (!puzzle)
+                    return `Couldn't fit all ${settings.words.length} words in a ${settings.size}×${settings.size} grid. ` +
+                           'Try a bigger grid or fewer words.';
+                return { settings, puzzle };
+            });
+        }
+
+        function generateRandom(size) {
+            runGenerator(() => {
+                const result = generateRandomPuzzle(size);
+                if (!result) return `Couldn't build a ${size}×${size} puzzle. Please try again.`;
+                return { settings: { size, words: result.words }, puzzle: result.puzzle };
+            });
         }
 
         function newPuzzle() {
@@ -639,6 +697,10 @@
         sizeInput.addEventListener('input', () => {
             sizeValue.textContent = `${sizeInput.value}×${sizeInput.value}`;
         });
+
+        // Changing the size picks a new word list that fits the grid
+        sizeInput.addEventListener('change', () => generateRandom(parseInt(sizeInput.value, 10)));
+        document.getElementById('randomBtn').addEventListener('click', () => generateRandom(parseInt(sizeInput.value, 10)));
 
         document.getElementById('settingsForm').addEventListener('submit', e => {
             e.preventDefault();
