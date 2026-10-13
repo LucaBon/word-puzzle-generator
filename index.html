@@ -354,8 +354,8 @@
                     <div class="field">
                         <label for="langInput">Word language</label>
                         <select id="langInput">
-                            <option value="it">🇮🇹 Italiano</option>
                             <option value="en">🇬🇧 English</option>
+                            <option value="it">🇮🇹 Italiano</option>
                             <option value="es">🇪🇸 Español</option>
                             <option value="fr">🇫🇷 Français</option>
                             <option value="de">🇩🇪 Deutsch</option>
@@ -408,14 +408,14 @@
         // ---------- Generator (port of word_puzzle/application/services.py) ----------
 
         const MIN_SIZE = 5, MAX_SIZE = 30, MAX_WORDS = 40;
-        const DEFAULT_WORDS = ['ALGORITMO', 'RETE', 'NEURONI', 'MACHINELEARNING', 'MODELLO', 'DATI',
-            'ADDESTRAMENTO', 'INTELLIGENZA', 'ARTIFICIALE', 'AUTOMAZIONE', 'PREDIZIONE', 'LINGUAGGIO',
-            'VISIONE', 'ROBOT', 'CLASSIFICAZIONE', 'DEEP', 'RICONOSCIMENTO', 'TOKEN', 'GENERATIVO', 'RANDOMFOREST'];
+        const DEFAULT_WORDS = ['ALGORITHM', 'NETWORK', 'NEURON', 'MACHINELEARNING', 'MODEL', 'DATA',
+            'TRAINING', 'INTELLIGENCE', 'ARTIFICIAL', 'AUTOMATION', 'PREDICTION', 'LANGUAGE',
+            'VISION', 'ROBOT', 'CLASSIFICATION', 'DEEP', 'RECOGNITION', 'TOKEN', 'GENERATIVE', 'RANDOMFOREST'];
 
         // Word banks used to pick a list that suits the chosen grid size.
         // Words are written without accents (German umlauts as AE/OE/UE) so they
         // blend in with the A–Z filler letters.
-        const DEFAULT_LANG = 'it';
+        const DEFAULT_LANG = 'en';
         const WORD_BANKS = {
             it: ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATI', 'RETE', 'DEEP', 'BIAS', 'NODO', 'PESO',
                 'TOKEN', 'ROBOT', 'PIXEL', 'CLOUD', 'CODICE', 'STRATO', 'LOGICA', 'AGENTE', 'PROMPT', 'SEGNALE',
@@ -936,7 +936,7 @@
 
         // ---------- Start ----------
 
-        // Shared links keep their words; otherwise the Italian default list is shown,
+        // Shared links keep their words; otherwise the English default list is shown,
         // or a random list when another language was requested
         const initial = loadFromUrl();
         syncForm({ ...initial, words: initial.words.length ? initial.words : DEFAULT_WORDS });
