@@ -39,8 +39,6 @@ python3 main.py --wordfile words.txt --size 15
 
 ## Architecture
 
-This project follows **Clean Architecture** principles:
-
 ```
 ┌─────────────────────────────────────┐
 │   Presentation (CLI, HTML)          │
@@ -150,38 +148,6 @@ if strategy.generate(puzzle):
 - **Strategy Pattern**: Pluggable generation algorithms
 - **Presenter Pattern**: Separate logic from presentation
 - **Value Object Pattern**: Immutable, self-validating objects
-
-## Benefits of Clean Architecture
-
-### Testability
-
-```python
-# Test domain logic independently
-def test_puzzle_placement():
-    puzzle = Puzzle(grid_size=5, words=[Word("HELLO")])
-    assert puzzle.can_place_word(
-        Word("HELLO"),
-        Position(0, 0),
-        Directions.HORIZONTAL_RIGHT
-    )
-```
-
-### Flexibility
-
-Want to add PDF export? Just implement the interface:
-
-```python
-class PDFPresenter(IPuzzlePresenter):
-    def present(self, puzzles, metadata):
-        return generate_pdf(puzzles)
-```
-
-### Maintainability
-
-- Clear separation of concerns
-- Each layer has a single responsibility
-- Easy to locate and modify code
-- Changes in one layer don't affect others
 
 ## Documentation
 
