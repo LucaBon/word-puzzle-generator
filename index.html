@@ -338,7 +338,7 @@
 <body>
     <div class="container">
         <h1>🔍 Word Search Puzzle</h1>
-        <div class="subtitle">Click and drag to select words! Pick your own words, grid size and language below.</div>
+        <div class="subtitle">Click and drag to select words! Pick your own words, grid size, language and theme below.</div>
 
         <details class="settings" open>
             <summary>⚙️ Customize puzzle</summary>
@@ -359,6 +359,13 @@
                             <option value="es">🇪🇸 Español</option>
                             <option value="fr">🇫🇷 Français</option>
                             <option value="de">🇩🇪 Deutsch</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="themeInput">Random words from</label>
+                        <select id="themeInput">
+                            <option value="all">📖 Whole dictionary</option>
+                            <option value="ai">🤖 Artificial intelligence</option>
                         </select>
                     </div>
                 </div>
@@ -394,7 +401,8 @@
         </div>
 
         <div class="footer">
-            Made with <a href="https://github.com/LucaBon/word-puzzle-generator">word-puzzle-generator</a>
+            Made with <a href="https://github.com/LucaBon/word-puzzle-generator">word-puzzle-generator</a><br>
+            Dictionary words from <a href="https://github.com/rspeer/wordfreq">wordfreq</a> (CC BY-SA 4.0)
         </div>
     </div>
     <div class="overlay" id="overlay"></div>
@@ -408,14 +416,12 @@
         // ---------- Generator (port of word_puzzle/application/services.py) ----------
 
         const MIN_SIZE = 5, MAX_SIZE = 30, MAX_WORDS = 40;
-        const DEFAULT_WORDS = ['ALGORITHM', 'NETWORK', 'NEURON', 'MACHINELEARNING', 'MODEL', 'DATA',
-            'TRAINING', 'INTELLIGENCE', 'ARTIFICIAL', 'AUTOMATION', 'PREDICTION', 'LANGUAGE',
-            'VISION', 'ROBOT', 'CLASSIFICATION', 'DEEP', 'RECOGNITION', 'TOKEN', 'GENERATIVE', 'RANDOMFOREST'];
-
-        // Word banks used to pick a list that suits the chosen grid size.
+        // AI-themed word banks used to pick a list that suits the chosen grid size.
         // Words are written without accents (German umlauts as AE/OE/UE) so they
         // blend in with the A–Z filler letters.
         const DEFAULT_LANG = 'en';
+        const DEFAULT_THEME = 'all';
+        const THEMES = ['all', 'ai'];
         const WORD_BANKS = {
             it: ['BIT', 'GPU', 'BYTE', 'CHIP', 'DATI', 'RETE', 'DEEP', 'BIAS', 'NODO', 'PESO',
                 'TOKEN', 'ROBOT', 'PIXEL', 'CLOUD', 'CODICE', 'STRATO', 'LOGICA', 'AGENTE', 'PROMPT', 'SEGNALE',
@@ -460,17 +466,41 @@
             return Math.min(MAX_WORDS, Math.round(size * 0.8));
         }
 
-        function pickWords(size, count, lang) {
+        // Whole-language word lists (dictionaries/<lang>.txt, most common words first,
+        // built by scripts/build_dictionaries.py), downloaded the first time they are needed
+        const dictionaries = {};
+
+        function loadDictionary(lang) {
+            if (!dictionaries[lang]) {
+                dictionaries[lang] = fetch(`dictionaries/${lang}.txt`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(response.statusText);
+                        return response.text();
+                    })
+                    .then(text => text.split('\n').filter(Boolean))
+                    .catch(error => { delete dictionaries[lang]; throw error; });
+            }
+            return dictionaries[lang];
+        }
+
+        function pickWords(size, count, bank, favorCommon) {
             const minLength = size >= 15 ? 4 : 3;
-            const eligible = WORD_BANKS[lang].filter(w => w.length <= size && w.length >= minLength);
-            return shuffle([...eligible]).slice(0, count);
+            const fits = w => w.length <= size && w.length >= minLength;
+            if (!favorCommon) return shuffle(bank.filter(fits)).slice(0, count);
+            // Squaring the random number favours the start of the list, i.e. the more common words
+            const picked = new Set();
+            for (let tries = 0; picked.size < count && tries < count * 200; tries++) {
+                const word = bank[Math.floor(bank.length * Math.random() ** 2)];
+                if (fits(word)) picked.add(word);
+            }
+            return [...picked];
         }
 
         // Pick words for the size, trying a fresh (and eventually smaller) sample if they don't fit
-        function generateRandomPuzzle(size, lang) {
+        function generateRandomPuzzle(size, bank, favorCommon) {
             const target = wordCountFor(size);
             for (let attempt = 0; attempt < 9; attempt++) {
-                const words = pickWords(size, Math.max(1, target - Math.floor(attempt / 3)), lang);
+                const words = pickWords(size, Math.max(1, target - Math.floor(attempt / 3)), bank, favorCommon);
                 const puzzle = generatePuzzle(size, words, 300, 600);
                 if (puzzle) return { words, puzzle };
             }
@@ -632,10 +662,11 @@
         const sizeValue = document.getElementById('sizeValue');
         const wordsInput = document.getElementById('wordsInput');
         const langInput = document.getElementById('langInput');
+        const themeInput = document.getElementById('themeInput');
         const settingsError = document.getElementById('settingsError');
         const generateBtn = document.getElementById('generateBtn');
 
-        let currentSettings = { size: 20, words: DEFAULT_WORDS, lang: DEFAULT_LANG };
+        let currentSettings = { size: 20, words: [], lang: DEFAULT_LANG, theme: DEFAULT_THEME };
         let wordData = {};
         let cellsArray = [];
         let isSelecting = false;
@@ -689,20 +720,24 @@
             settingsError.classList.toggle('show', !!message);
         }
 
-        function runGenerator(task) {
+        function setBusy(label) {
+            generateBtn.disabled = !!label;
+            generateBtn.textContent = label || '✨ Generate';
+        }
+
+        function runGenerator(task, notice) {
             showError('');
-            generateBtn.disabled = true;
-            generateBtn.textContent = '⏳ Generating…';
+            setBusy('⏳ Generating…');
             // Let the browser paint the button state before the synchronous search
             setTimeout(() => {
                 const result = task();
-                generateBtn.disabled = false;
-                generateBtn.textContent = '✨ Generate';
+                setBusy(null);
                 if (typeof result === 'string') { showError(result); return; }
                 currentSettings = result.settings;
                 syncForm(result.settings);
                 render(result.puzzle);
                 saveToUrl(result.settings);
+                if (notice) showError(notice);
             }, 20);
         }
 
@@ -714,16 +749,34 @@
                 if (!puzzle)
                     return `Couldn't fit all ${settings.words.length} words in a ${settings.size}×${settings.size} grid. ` +
                            'Try a bigger grid or fewer words.';
-                return { settings: { ...settings, lang: settings.lang || langInput.value }, puzzle };
+                return { settings: { lang: langInput.value, theme: themeInput.value, ...settings }, puzzle };
             });
         }
 
-        function generateRandom(size, lang) {
+        let randomRequest = 0;
+
+        async function generateRandom(size, lang, theme) {
+            const request = ++randomRequest;
+            let bank = WORD_BANKS[lang], notice = null;
+            if (theme === 'all') {
+                showError('');
+                setBusy('⏳ Loading words…');
+                try {
+                    bank = await loadDictionary(lang);
+                } catch {
+                    const language = langInput.selectedOptions[0].text.replace(/^\S+\s+/, '');
+                    notice = `Couldn't load the ${language} dictionary, ` +
+                             'so these words come from the artificial intelligence list.';
+                }
+                // A newer request (e.g. another language was picked meanwhile) takes over
+                if (request !== randomRequest) return;
+            }
+            const favorCommon = bank !== WORD_BANKS[lang];
             runGenerator(() => {
-                const result = generateRandomPuzzle(size, lang);
+                const result = generateRandomPuzzle(size, bank, favorCommon);
                 if (!result) return `Couldn't build a ${size}×${size} puzzle. Please try again.`;
-                return { settings: { size, lang, words: result.words }, puzzle: result.puzzle };
-            });
+                return { settings: { size, lang, theme, words: result.words }, puzzle: result.puzzle };
+            }, notice);
         }
 
         function newPuzzle() {
@@ -733,8 +786,8 @@
         }
 
         // Settings are kept in the URL so a custom puzzle can be shared
-        function saveToUrl({ size, lang, words }) {
-            const params = new URLSearchParams({ size, lang, words: words.join(',') });
+        function saveToUrl({ size, lang, theme, words }) {
+            const params = new URLSearchParams({ size, lang, theme, words: words.join(',') });
             history.replaceState(null, '', '?' + params.toString());
         }
 
@@ -743,16 +796,19 @@
             const size = parseInt(params.get('size'), 10);
             const words = params.has('words') ? parseWords(params.get('words')) : [];
             const lang = params.get('lang');
+            const theme = params.get('theme');
             return {
                 size: size >= MIN_SIZE && size <= MAX_SIZE ? size : 20,
                 lang: WORD_BANKS.hasOwnProperty(lang) ? lang : DEFAULT_LANG,
+                theme: THEMES.includes(theme) ? theme : DEFAULT_THEME,
                 words
             };
         }
 
-        function syncForm({ size, lang, words }) {
+        function syncForm({ size, lang, theme, words }) {
             sizeInput.value = size;
             langInput.value = lang;
+            themeInput.value = theme;
             sizeValue.textContent = `${size}×${size}`;
             wordsInput.value = words.join(', ');
         }
@@ -761,15 +817,17 @@
             sizeValue.textContent = `${sizeInput.value}×${sizeInput.value}`;
         });
 
-        // Changing the size or language picks a new word list that fits the grid
-        const generateRandomFromForm = () => generateRandom(parseInt(sizeInput.value, 10), langInput.value);
+        // Changing the size, language or theme picks a new word list that fits the grid
+        const generateRandomFromForm = () =>
+            generateRandom(parseInt(sizeInput.value, 10), langInput.value, themeInput.value);
         sizeInput.addEventListener('change', generateRandomFromForm);
         langInput.addEventListener('change', generateRandomFromForm);
+        themeInput.addEventListener('change', generateRandomFromForm);
         document.getElementById('randomBtn').addEventListener('click', generateRandomFromForm);
 
         document.getElementById('settingsForm').addEventListener('submit', e => {
             e.preventDefault();
-            generate({ size: parseInt(sizeInput.value, 10), lang: langInput.value, words: parseWords(wordsInput.value) });
+            generate({ size: parseInt(sizeInput.value, 10), words: parseWords(wordsInput.value) });
         });
 
         wordsInput.addEventListener('keydown', e => {
@@ -936,13 +994,11 @@
 
         // ---------- Start ----------
 
-        // Shared links keep their words; otherwise the English default list is shown,
-        // or a random list when another language was requested
+        // Shared links keep their words; otherwise a random list is picked
         const initial = loadFromUrl();
-        syncForm({ ...initial, words: initial.words.length ? initial.words : DEFAULT_WORDS });
+        syncForm(initial);
         if (initial.words.length) generate(initial);
-        else if (initial.lang === DEFAULT_LANG) generate({ ...initial, words: DEFAULT_WORDS });
-        else generateRandom(initial.size, initial.lang);
+        else generateRandom(initial.size, initial.lang, initial.theme);
     </script>
 </body>
 </html>
