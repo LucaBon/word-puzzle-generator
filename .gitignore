@@ -48,6 +48,7 @@ htmlcov/
 # Generated files
 *.html
 !docs/*.html
+!index.html
 
 # Logs
 *.log
